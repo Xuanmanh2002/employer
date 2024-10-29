@@ -1,19 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  DropdownToggle,
-  Form,
-  FormGroup,
-  InputGroupAddon,
-  InputGroupText,
-  Input,
-  InputGroup,
+  Badge,
   Navbar,
   Nav,
   Container,
   Media,
+  Button,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "components/Auth/AuthProvider";
@@ -23,7 +19,6 @@ const EmployerNavbar = (props) => {
   const { handleLogout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
 
   const [employer, setEmployer] = useState({
     firstName: "",
@@ -89,9 +84,10 @@ const EmployerNavbar = (props) => {
     handleLogout();
     navigate("/auth/login", { state: { message: "You have been logged out!" } });
   };
+
   return (
     <>
-       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
+      <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
         <Container fluid>
           <Link
             className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
@@ -100,20 +96,51 @@ const EmployerNavbar = (props) => {
             {props.brandText}
           </Link>
           <Nav className="align-items-center d-none d-md-flex" navbar>
+            <Button color="link" className="text-white position-relative" onClick={() => navigate("/employer/cart")}>
+              <i className="ni ni-cart" />
+              <Badge
+                color="danger"
+                pill
+                className="position-absolute"
+                style={{ top: '0', right: '-10px', fontSize: '0.75rem' }}
+              >
+                1
+              </Badge>
+            </Button>
+
+            <UncontrolledDropdown nav>
+              <DropdownToggle nav>
+                <i className="ni ni-bell-55 text-white" />
+              </DropdownToggle>
+              <DropdownMenu className="dropdown-menu-arrow" right>
+                <DropdownItem header tag="div">
+                  <h6 className="text-overflow m-0">Notifications</h6>
+                </DropdownItem>
+                <DropdownItem>
+                  <Link to="/notifications">View All Notifications</Link>
+                </DropdownItem>
+                <DropdownItem>
+                  <span>Mark All as Read</span>
+                </DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
+
             <UncontrolledDropdown nav>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
                   <span className="avatar avatar-sm rounded-circle">
-                    <img alt="Avatar"  src={
-                          employer.avatar
-                            ? `data:image/jpeg;base64,${employer.avatar}`
-                            : require("../../assets/img/theme/team-4-800x800.jpg")
-                        }
+                    <img
+                      alt="Avatar"
+                      src={
+                        employer.avatar
+                          ? `data:image/jpeg;base64,${employer.avatar}`
+                          : require("../../assets/img/theme/team-4-800x800.jpg")
+                      }
                     />
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                    {employer.firstName} {employer.lastName} 
+                      {employer.firstName} {employer.lastName}
                     </span>
                   </Media>
                 </Media>

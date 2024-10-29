@@ -79,3 +79,86 @@ export async function registerEmployer(registration) {
 		}
 	}
 }
+
+export async function getAllService() {
+	try {
+		const result = await api.get("/admin/service/all", {
+			headers: getHeader(),
+		});
+		if (result.status === 204 || !result.data || result.data.length === 0) {
+			return [];
+		}
+		return result.data;
+	} catch (error) {
+		console.error("Error fetching services:", error);
+		throw new Error(`Error fetching services: ${error.response?.data?.message || error.message}`);
+	}
+}
+
+export async function getAllJob() {
+    try {
+        const token = localStorage.getItem("token");
+        const adminId = localStorage.getItem("adminId");
+        if (!token || !adminId) {
+            throw new Error("User is not authenticated or adminId is not found.");
+        }
+        const result = await api.get("/employer/job/all-job-by-employer", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+        if (result.status === 204 || !result.data || result.data.length === 0) {
+            return [];
+        }
+        return result.data;
+    } catch (error) {
+        console.error("Error fetching job:", error);
+        throw new Error(`Error fetching job: ${error.response?.data?.message || error.message}`);
+    }
+}
+export async function createJob(jobName, experience, applicationDeadline, recruitmentDetails, categoryId) {
+    const data = {
+        jobName: jobName,
+        experience: experience,
+        applicationDeadline: applicationDeadline,
+        recruitmentDetails: recruitmentDetails,
+        categoryId: categoryId,
+    };
+
+    try {
+        const response = await api.post("/employer/job/create", data, {
+            headers: getHeader(),
+        });
+        if (response.status === 200 && response.data.status === "success") {
+            return {
+                success: true,
+                message: response.data.message,
+            };
+        } else {
+            return {
+                success: false,
+                message: response.data.message || "Failed to create job",
+            };
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: error.response ? error.response.data.message : error.message,
+        };
+    }
+}
+
+export async function getAllCategories() {
+	try {
+		const result = await api.get("/admin/category/all");
+		if (result.status === 204 || !result.data || result.data.length === 0) {
+			return [];
+		}
+		return result.data;
+	} catch (error) {
+		console.error("Error fetching categories:", error);
+		throw new Error(`Error fetching categories: ${error.response?.data?.message || error.message}`);
+	}
+}
+
