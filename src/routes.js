@@ -4,8 +4,9 @@ import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 import Icons from "views/examples/Icons.js";
 import Service from "views/examples/BuyService/Service";
-import Job from "views/examples/JobManager/Job";
-import CreateJob from "views/examples/JobManager/CreateJob";
+import Job from "views/examples/jobManager/Job";
+import CreateJob from "views/examples/jobManager/CreateJob";
+import UpdateJob from "views/examples/jobManager/UpdateJob";
 
 var routes = [
   {
@@ -58,5 +59,11 @@ var routes = [
     component: <Register />,
     layout: "/auth",
   },
+  {
+    path: "/update-job/:id",
+    component: <UpdateJob />,
+    layout: "/employer",
+  }
+  
 ];
 export default routes;

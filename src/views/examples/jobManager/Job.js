@@ -14,20 +14,58 @@ import {
   Container,
   Row,
   Input,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Alert,
 } from "reactstrap";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import Header from "components/Headers/Header.js";
-import { getAllJob } from "utils/ApiFunctions";
+import { getAllJob, deleteJob, getAllCategories } from "utils/ApiFunctions";
 
 const Job = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const jobsPerPage = 5; 
+  const [modal, setModal] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const jobsPerPage = 5;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const jobsData = await getAllJob();
+        const categoriesData = await getAllCategories();
+        setCategories(categoriesData);
+        const jobsWithCategoryName = jobsData.map((job) => {
+          const category = categoriesData.find(
+            (cat) => cat.id === job.categoryId
+          );
+          return {
+            ...job,
+            categoryName: category ? category.categoryName : "Unknown",
+          };
+        });
+
+        setJobs(jobsWithCategoryName);
+        setFilteredJobs(jobsWithCategoryName);
+      } catch (err) {
+        setError("Failed to load jobs.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -36,9 +74,10 @@ const Job = () => {
     setFilter(searchTerm);
 
     const filtered = searchTerm
-      ? jobs.filter((job) =>
-          job.jobName?.toLowerCase().includes(searchTerm) ||
-          job.recruitmentDetails?.toLowerCase().includes(searchTerm)
+      ? jobs.filter(
+          (job) =>
+            job.jobName?.toLowerCase().includes(searchTerm) ||
+            job.recruitmentDetails?.toLowerCase().includes(searchTerm)
         )
       : jobs;
 
@@ -51,22 +90,26 @@ const Job = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoading(true);
-      try {
-        const data = await getAllJob();
-        setJobs(data); 
-        setFilteredJobs(data);
-      } catch (err) {
-        setError("Failed to load jobs.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const openModal = (jobId) => {
+    setJobToDelete(jobId);
+    setModal(true);
+  };
 
-    fetchJobs();
-  }, []);
+  const handleConfirmDelete = async () => {
+    if (jobToDelete) {
+      try {
+        await deleteJob(jobToDelete);
+        setJobs(jobs.filter((job) => job.id !== jobToDelete));
+        setFilteredJobs(filteredJobs.filter((job) => job.id !== jobToDelete));
+        setSuccessMessage("Job deleted successfully.");
+      } catch (error) {
+        setError("Failed to delete job.");
+      } finally {
+        setModal(false);
+        setJobToDelete(null);
+      }
+    }
+  };
 
   return (
     <>
@@ -95,45 +138,56 @@ const Job = () => {
                 </div>
               </CardHeader>
 
+              {successMessage && (
+                <Alert color="success" toggle={() => setSuccessMessage("")}>
+                  {successMessage}
+                </Alert>
+              )}
+
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light">
                   <tr>
                     <th scope="col">ID</th>
-                    <th scope="col">Job Name</th>
-                    <th scope="col">Experience</th>
-                    <th scope="col">Application Deadline</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col">Vị trí công viêc</th>
+                    <th scope="col">Kinh nghiệm</th>
+                    <th scope="col">Thời hạn nạp hồ sơ</th>
+                    <th scope="col">Chi tiết công việc</th>
+                    <th scope="col">Dannh mục công việc</th>
+                    <th scope="col">Ngày khởi tạo</th>
+                    <th scope="col">Chức năng</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="5" className="text-center">Loading...</td>
+                      <td colSpan="7" className="text-center">Loading...</td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan="5" className="text-danger text-center">{error}</td>
+                      <td colSpan="7" className="text-danger text-center">{error}</td>
                     </tr>
                   ) : currentJobs.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="text-center">No jobs found.</td>
+                      <td colSpan="7" className="text-center">No jobs found.</td>
                     </tr>
                   ) : (
                     currentJobs.map((job, index) => (
                       <tr key={job.id}>
                         <th scope="row">{indexOfFirstJob + index + 1}</th>
                         <td>{job.jobName}</td>
-                        <td>{job.experience}</td>
+                        <td>{job.experience}<span> năm</span></td>
                         <td>{job.applicationDeadline ? format(new Date(job.applicationDeadline), "dd/MM/yyyy") : "N/A"}</td>
+                        <td>{job.recruitmentDetails}</td>
+                        <td>{job.categoryName || "N/A"}</td>
+                        <td>{job.createAt ? format(new Date(job.createAt), "dd/MM/yyyy") : "N/A"}</td>
                         <td>
                           <UncontrolledDropdown>
                             <DropdownToggle className="btn-icon-only text-light" size="sm">
                               <i className="fas fa-ellipsis-v" />
                             </DropdownToggle>
                             <DropdownMenu className="dropdown-menu-arrow" right>
-                              {/* Uncomment the below items if needed */}
-                              {/* <DropdownItem onClick={() => handleDelete(job.id)}>Delete</DropdownItem> */}
-                              <DropdownItem onClick={() => navigate(`/admin/update-job/${job.id}`, { state: job })}>
+                              <DropdownItem onClick={() => openModal(job.id)}>Delete</DropdownItem>
+                              <DropdownItem onClick={() => navigate(`/employer/update-job/${job.id}`, { state: job })}>
                                 Edit
                               </DropdownItem>
                             </DropdownMenu>
@@ -166,6 +220,16 @@ const Job = () => {
             </Card>
           </div>
         </Row>
+        <Modal isOpen={modal} toggle={() => setModal(!modal)}>
+          <ModalHeader toggle={() => setModal(!modal)}>Confirm Delete</ModalHeader>
+          <ModalBody>
+            Are you sure you want to delete this job?
+          </ModalBody>
+          <ModalFooter>
+            <button className="btn btn-secondary" onClick={() => setModal(false)}>Cancel</button>
+            <button className="btn btn-danger" onClick={handleConfirmDelete}>Delete</button>
+          </ModalFooter>
+        </Modal>
       </Container>
     </>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Card,
@@ -14,50 +14,68 @@ import {
   Col,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import { registerEmployer } from "utils/ApiFunctions";
+import { registerEmployer, getAllAddress } from "utils/ApiFunctions";
 
 const Register = () => {
   const [registration, setRegistration] = useState({
-    firstName: "", lastName: "", birthDate: "", avatar: null, gender: "",
-    telephone: "", address: "", email: "", password: "", companyName: "",
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    avatar: null,
+    gender: "",
+    telephone: "",
+    addressId: "",
+    companyName: "",
+    email: "",
+    password: ""
   });
-
+  const [addresses, setAddresses] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const addressList = await getAllAddress();
+        setAddresses(addressList);
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+        setErrorMessage("Failed to load addresses");
+      }
+    };
+
+    fetchAddresses();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setRegistration({ ...registration, [name]: value });
+    setRegistration((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
-    setRegistration({ ...registration, avatar: e.target.files[0] });
+    setRegistration((prev) => ({ ...prev, avatar: e.target.files[0] }));
   };
 
   const handleRegistration = async (e) => {
     e.preventDefault();
-    try {
-      const formData = new FormData();
-      Object.keys(registration).forEach((key) => {
-        formData.append(key, registration[key]);
-      });
 
-      await registerEmployer(formData);
+    try {
+      await registerEmployer(registration); 
       setSuccessMessage("Registration successful!");
       setErrorMessage("");
       navigate("/auth/login");
-
     } catch (error) {
       setSuccessMessage("");
-      setErrorMessage(`Registration error: ${error.message}`);
+      setErrorMessage(`Registration error: ${error.message || "Unknown error"}`);
     }
-
+    
     setTimeout(() => {
       setErrorMessage("");
       setSuccessMessage("");
     }, 5000);
   };
+
   return (
     <>
       <Col lg="6" md="8">
@@ -160,7 +178,8 @@ const Register = () => {
                     type="date"
                     className="form-control"
                     value={registration.birthDate}
-                    onChange={handleInputChange} />
+                    onChange={handleInputChange}
+                  />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -171,13 +190,17 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Gender"
-                    id="gender"
+                    type="select"
                     name="gender"
-                    type="text"
+                    id="gender"
                     className="form-control"
                     value={registration.gender}
-                    onChange={handleInputChange} />
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                  </Input>
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -222,13 +245,19 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Address"
-                    id="address"
-                    name="address"
-                    type="text"
+                    type="select"
+                    name="addressId"
                     className="form-control"
-                    value={registration.address}
-                    onChange={handleInputChange} />
+                    value={registration.addressId}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Address</option>
+                    {addresses.map((address) => (
+                      <option key={address.id} value={address.id}>
+                        {address.name}
+                      </option>
+                    ))}
+                  </Input>
                 </InputGroup>
               </FormGroup>
               <FormGroup>

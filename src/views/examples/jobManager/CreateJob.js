@@ -86,7 +86,9 @@ const CreateJob = () => {
                             <CardBody>
                                 <Form role="form" onSubmit={handleSubmit}>
                                     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-                                    {successMessage && <div className="alert alert-success">{successMessage}</div>}
+                                    {successMessage && (
+                                        <div className="success-message">{successMessage}</div>
+                                    )}
 
                                     <FormGroup>
                                         <label htmlFor="jobName">Job Name</label>
