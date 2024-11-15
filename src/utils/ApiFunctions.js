@@ -99,6 +99,52 @@ export async function registerEmployer(registration) {
 	}
 }
 
+export async function updateEmployer(email, firstName, lastName, gender, avatarFile, addressId, telephone, birthDate, companyName) {
+    const formData = new FormData();
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("gender", gender);
+    formData.append("telephone", telephone);
+    formData.append("addressId", addressId);
+	formData.append("companyName", companyName)
+    
+    if (birthDate) {
+        formData.append("birthDate", birthDate);
+    }
+
+    if (avatarFile) {
+        formData.append("avatar", avatarFile); 
+    }
+
+    try {
+        const response = await api.put(`/employer/update/${email}`, formData, {
+            headers: {
+                ...getHeader(),
+                'Content-Type': 'multipart/form-data' 
+            },
+        });
+
+        if (response.status >= 200 && response.status < 300) {
+            return response.data; 
+        } else {
+            throw new Error(`Update failed with status: ${response.status}`);
+        }
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Error updating employer.");
+    }
+}
+
+export async function getEmployer(email, token) {
+	try {
+		const response = await api.get(`/employer/show-profile/${email}`, {
+			headers: getHeader()
+		})
+		return response.data
+	} catch (error) {
+		throw error
+	}
+}
+
 export async function getAllService() {
 	try {
 		const result = await api.get("/admin/service/all", {
@@ -136,10 +182,11 @@ export async function getAllJob() {
 		throw new Error(`Error fetching job: ${error.response?.data?.message || error.message}`);
 	}
 }
-export async function createJob(jobName, experience, applicationDeadline, recruitmentDetails, categoryId) {
+export async function createJob(jobName, experience, price,applicationDeadline, recruitmentDetails, categoryId) {
 	const data = {
 		jobName: jobName,
 		experience: experience,
+		price: price,
 		applicationDeadline: applicationDeadline,
 		recruitmentDetails: recruitmentDetails,
 		categoryId: categoryId,
@@ -183,6 +230,7 @@ export async function updateJob(jobId, updatedJob) {
 	const data = {
 		jobName: updatedJob.jobName,
 		experience: updatedJob.experience,
+		price: updatedJob.price,
 		applicationDeadline: updatedJob.applicationDeadline,
 		recruitmentDetails: updatedJob.recruitmentDetails,
 		categoryId: updatedJob.categoryId,

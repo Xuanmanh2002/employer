@@ -1,22 +1,4 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.4
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2024 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-// reactstrap components
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -29,28 +11,167 @@ import {
   Row,
   Col,
 } from "reactstrap";
-// core components
 import UserHeader from "components/Headers/UserHeader.js";
+import { getEmployer, updateEmployer, getAllAddress } from "utils/ApiFunctions";
+import { format } from "date-fns";
+import { FaEdit } from "react-icons/fa";
 
 const Profile = () => {
+  const [employer, setEmployer] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    avatar: "",
+    gender: "",
+    telephone: "",
+    addressId: "",
+    companyName: ""
+  });
+  const [addressName, setAddressName] = useState("");
+  const [addresses, setAddresses] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const email = localStorage.getItem("email");
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchEmployerData = async () => {
+      try {
+        const employerData = await getEmployer(email, token);
+        setEmployer(employerData);
+        const allAddresses = await getAllAddress();
+        setAddresses(allAddresses);
+        if (employerData.addressId) {
+          const address = allAddresses.find(addr => addr.id === employerData.addressId);
+          setAddressName(address ? address.name : "Unknown");
+        }
+      } catch (error) {
+        console.error(error);
+        setErrorMessage("Error fetching employer data");
+      }
+    };
+
+    if (email && token) {
+      fetchEmployerData();
+    } else {
+      setErrorMessage("User not logged in");
+    }
+  }, [email, token]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEmployer((prevEmployer) => ({
+          ...prevEmployer,
+          avatar: file,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    document.getElementById("avatar-upload").click();
+  };
+
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+    const birth = new Date(birthDate);
+    if (isNaN(birth.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const formattedBirthDate = () => {
+    if (!employer.birthDate) return "";
+    const birth = new Date(employer.birthDate);
+    return isNaN(birth.getTime()) ? "" : format(birth, "yyyy-MM-dd");
+  };
+
+  const age = calculateAge(employer.birthDate);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEmployer((prevEmployer) => ({
+      ...prevEmployer,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateEmployer(
+        employer.email,
+        employer.firstName,
+        employer.lastName,
+        employer.gender,
+        employer.avatar,
+        employer.addressId,
+        employer.telephone,
+        employer.birthDate,
+        employer.companyName
+      );
+      setErrorMessage("");
+      setSuccessMessage("Profile updated successfully!");
+    } catch (error) {
+      setErrorMessage(error.message);
+      setSuccessMessage("");
+    }
+  };
   return (
     <>
       <UserHeader />
-      {/* Page content */}
       <Container className="mt--7" fluid>
+        {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+        {successMessage && <div className="alert alert-success">{successMessage}</div>}
         <Row>
           <Col className="order-xl-2 mb-5 mb-xl-0" xl="4">
             <Card className="card-profile shadow">
               <Row className="justify-content-center">
                 <Col className="order-lg-2" lg="3">
-                  <div className="card-profile-image">
-                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                  <div className="card-profile-image" style={{ position: "relative" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      style={{ display: "none" }}
+                      id="avatar-upload"
+                    />
+                    <label htmlFor="avatar-upload" style={{ cursor: "pointer" }}>
                       <img
-                        alt="..."
+                        alt="Avatar"
                         className="rounded-circle"
-                        src={require("../../assets/img/theme/team-4-800x800.jpg")}
+                        src={
+                          employer.avatar
+                            ? `data:image/jpeg;base64,${employer.avatar}`
+                            : require("../../assets/img/theme/team-4-800x800.jpg")
+                        }
+                        style={{ width: "150px", height: "150px", objectFit: "cover" }}
                       />
-                    </a>
+                    </label>
+                    <FaEdit
+                      onClick={triggerFileInput}
+                      style={{
+                        position: "absolute",
+                        top: "80px",
+                        right: "1px",
+                        cursor: "pointer",
+                        color: "black",
+                        backgroundColor: "white",
+                        borderRadius: "50%",
+                        padding: "7px",
+                        fontSize: "2rem",
+                      }}
+                    />
                   </div>
                 </Col>
               </Row>
@@ -77,47 +198,15 @@ const Profile = () => {
                 </div>
               </CardHeader>
               <CardBody className="pt-0 pt-md-4">
-                <Row>
-                  <div className="col">
-                    <div className="card-profile-stats d-flex justify-content-center mt-md-5">
-                      <div>
-                        <span className="heading">22</span>
-                        <span className="description">Friends</span>
-                      </div>
-                      <div>
-                        <span className="heading">10</span>
-                        <span className="description">Photos</span>
-                      </div>
-                      <div>
-                        <span className="heading">89</span>
-                        <span className="description">Comments</span>
-                      </div>
-                    </div>
-                  </div>
-                </Row>
                 <div className="text-center">
                   <h3>
-                    Jessica Jones
-                    <span className="font-weight-light">, 27</span>
+                    {employer.firstName} {employer.lastName}
+                    <span className="font-weight-light">, {age !== null ? age : "N/A"}</span>
                   </h3>
                   <div className="h5 font-weight-300">
                     <i className="ni location_pin mr-2" />
-                    Bucharest, Romania
+                    {addressName}
                   </div>
-                  <div className="h5 mt-4">
-                    <i className="ni business_briefcase-24 mr-2" />
-                    Solution Manager - Creative Tim Officer
-                  </div>
-                  <div>
-                    <i className="ni education_hat mr-2" />
-                    University of Computer Science
-                  </div>
-                  <hr className="my-4" />
-                  <p>
-                    Ryan — the name taken by Melbourne-raised, Brooklyn-based
-                    Nick Murphy — writes, performs and records all of his own
-                    music.
-                  </p>
                   <a href="#pablo" onClick={(e) => e.preventDefault()}>
                     Show more
                   </a>
@@ -130,16 +219,15 @@ const Profile = () => {
               <CardHeader className="bg-white border-0">
                 <Row className="align-items-center">
                   <Col xs="8">
-                    <h3 className="mb-0">My account</h3>
+                    <h3 className="mb-0">Tài khoản của tôi</h3>
                   </Col>
                   <Col className="text-right" xs="4">
                     <Button
                       color="primary"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
+                      onClick={handleSubmit}
                       size="sm"
                     >
-                      Settings
+                      Cập nhật
                     </Button>
                   </Col>
                 </Row>
@@ -147,41 +235,42 @@ const Profile = () => {
               <CardBody>
                 <Form>
                   <h6 className="heading-small text-muted mb-4">
-                    User information
+                    Thông tin người dùng
                   </h6>
                   <div className="pl-lg-4">
                     <Row>
                       <Col lg="6">
                         <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-username"
-                          >
-                            Username
+                          <label className="form-control-label" htmlFor="input-email">
+                            Email
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="lucky.jesse"
-                            id="input-username"
-                            placeholder="Username"
-                            type="text"
+                            id="input-email"
+                            value={employer.email}
+                            type="email"
+                            readOnly
                           />
                         </FormGroup>
                       </Col>
                       <Col lg="6">
                         <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-email"
-                          >
-                            Email address
+                          <label className="form-control-label" htmlFor="input-gender">
+                            Giới tính
                           </label>
                           <Input
+                            type="select"
+                            name="gender"
+                            id="input-gender"
                             className="form-control-alternative"
-                            id="input-email"
-                            placeholder="jesse@example.com"
-                            type="email"
-                          />
+                            value={employer.gender}
+                            onChange={handleInputChange}
+                          >
+                            <option value="">Select Gender</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                          </Input>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -192,13 +281,14 @@ const Profile = () => {
                             className="form-control-label"
                             htmlFor="input-first-name"
                           >
-                            First name
+                            Họ
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Lucky"
+                            name="firstName"
+                            defaultValue={employer.firstName}
                             id="input-first-name"
-                            placeholder="First name"
+                            onChange={handleInputChange}
                             type="text"
                           />
                         </FormGroup>
@@ -209,25 +299,40 @@ const Profile = () => {
                             className="form-control-label"
                             htmlFor="input-last-name"
                           >
-                            Last name
+                            Tên
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Jesse"
+                            name="lastName"
+                            defaultValue={employer.lastName}
                             id="input-last-name"
-                            placeholder="Last name"
+                            onChange={handleInputChange}
                             type="text"
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label className="form-control-label" htmlFor="input-birthdate">
+                            Ngày tháng năm sinh
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-birthdate"
+                            name="birthDate"
+                            value={formattedBirthDate()}
+                            onChange={handleInputChange}
+                            type="date"
                           />
                         </FormGroup>
                       </Col>
                     </Row>
                   </div>
                   <hr className="my-4" />
-                  {/* Address */}
-                  <h6 className="heading-small text-muted mb-4">
-                    Contact information
-                  </h6>
                   <div className="pl-lg-4">
+                    <h6 className="heading-small text-muted mb-4">
+                      Thông tin liên hệ
+                    </h6>
                     <Row>
                       <Col md="12">
                         <FormGroup>
@@ -235,15 +340,26 @@ const Profile = () => {
                             className="form-control-label"
                             htmlFor="input-address"
                           >
-                            Address
+                            Địa chỉ
                           </label>
                           <Input
-                            className="form-control-alternative"
-                            defaultValue="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
-                            id="input-address"
-                            placeholder="Home Address"
-                            type="text"
-                          />
+                            type="select"
+                            name="addressId"
+                            onChange={(e) => {
+                              const selectedAddressId = e.target.value;
+                              setEmployer((prevEmployer) => ({ ...prevEmployer, addressId: selectedAddressId }));
+                              const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+                              setAddressName(selectedAddress ? selectedAddress.name : "");
+                            }}
+                            value={employer.addressId}
+                          >
+                            <option value="">Select an address</option>
+                            {addresses.map((address) => (
+                              <option key={address.id} value={address.id}>
+                                {address.name}
+                              </option>
+                            ))}
+                          </Input>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -254,67 +370,19 @@ const Profile = () => {
                             className="form-control-label"
                             htmlFor="input-city"
                           >
-                            City
+                            Tên công ty
                           </label>
                           <Input
+                            name="companyName"
                             className="form-control-alternative"
-                            defaultValue="New York"
+                            defaultValue={employer.companyName}
                             id="input-city"
-                            placeholder="City"
                             type="text"
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col lg="4">
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-country"
-                          >
-                            Country
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            defaultValue="United States"
-                            id="input-country"
-                            placeholder="Country"
-                            type="text"
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col lg="4">
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-country"
-                          >
-                            Postal code
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-postal-code"
-                            placeholder="Postal code"
-                            type="number"
+                            onChange={handleInputChange}
                           />
                         </FormGroup>
                       </Col>
                     </Row>
-                  </div>
-                  <hr className="my-4" />
-                  {/* Description */}
-                  <h6 className="heading-small text-muted mb-4">About me</h6>
-                  <div className="pl-lg-4">
-                    <FormGroup>
-                      <label>About Me</label>
-                      <Input
-                        className="form-control-alternative"
-                        placeholder="A few words about you ..."
-                        rows="4"
-                        defaultValue="A beautiful Dashboard for Bootstrap 4. It is Free and
-                        Open Source."
-                        type="textarea"
-                      />
-                    </FormGroup>
                   </div>
                 </Form>
               </CardBody>

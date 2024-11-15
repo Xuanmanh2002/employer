@@ -14,6 +14,7 @@ const UpdateJob = () => {
     const [updatedJob, setUpdatedJob] = useState({
         jobName: job.jobName || "",
         experience: job.experience || "",
+        price: job.price || "",
         applicationDeadline: job.applicationDeadline || "",
         recruitmentDetails: job.recruitmentDetails || "",
         categoryId: job.categoryId || "",
@@ -123,6 +124,18 @@ const UpdateJob = () => {
                                                 id="experience"
                                                 name="experience"
                                                 value={updatedJob.experience}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </FormGroup>
+
+                                        <FormGroup>
+                                            <label htmlFor="price">Price</label>
+                                            <Input
+                                                type="text"
+                                                id="price"
+                                                name="price"
+                                                value={updatedJob.price}
                                                 onChange={handleInputChange}
                                                 required
                                             />

@@ -18,6 +18,7 @@ const CreateJob = () => {
     const [jobDetails, setJobDetails] = useState({
         jobName: "",
         experience: "",
+        price: "",
         applicationDeadline: "",
         recruitmentDetails: "",
         categoryId: "", 
@@ -50,6 +51,7 @@ const CreateJob = () => {
             const response = await createJob(
                 jobDetails.jobName,
                 jobDetails.experience,
+                jobDetails.price,
                 jobDetails.applicationDeadline,
                 jobDetails.recruitmentDetails,
                 jobDetails.categoryId 
@@ -60,6 +62,7 @@ const CreateJob = () => {
                 setJobDetails({
                     jobName: "",
                     experience: "",
+                    price: "",
                     applicationDeadline: "",
                     recruitmentDetails: "",
                     categoryId: "", 
@@ -81,7 +84,7 @@ const CreateJob = () => {
                     <Col>
                         <Card className="shadow">
                             <CardHeader className="border-0">
-                                <h3 className="mb-0">Create New Job</h3>
+                                <h3 className="mb-0">Tạo công việc mới</h3>
                             </CardHeader>
                             <CardBody>
                                 <Form role="form" onSubmit={handleSubmit}>
@@ -91,7 +94,7 @@ const CreateJob = () => {
                                     )}
 
                                     <FormGroup>
-                                        <label htmlFor="jobName">Job Name</label>
+                                        <label htmlFor="jobName">Tên công việc</label>
                                         <Input
                                             type="text"
                                             id="jobName"
@@ -104,7 +107,7 @@ const CreateJob = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <label htmlFor="experience">Experience</label>
+                                        <label htmlFor="experience">Kinh nghiệm</label>
                                         <Input
                                             type="text"
                                             id="experience"
@@ -117,7 +120,20 @@ const CreateJob = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <label htmlFor="applicationDeadline">Application Deadline</label>
+                                        <label htmlFor="price">Lương</label>
+                                        <Input
+                                            type="text"
+                                            id="price"
+                                            name="price"
+                                            placeholder="Enter price required"
+                                            value={jobDetails.price}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <label htmlFor="applicationDeadline">Hạn chót nộp đơn</label>
                                         <Input
                                             type="date"
                                             id="applicationDeadline"
@@ -129,7 +145,7 @@ const CreateJob = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <label htmlFor="recruitmentDetails">Recruitment Details</label>
+                                        <label htmlFor="recruitmentDetails">Chi tiết tuyển dụng</label>
                                         <Input
                                             type="textarea"
                                             id="recruitmentDetails"
@@ -142,7 +158,7 @@ const CreateJob = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <label htmlFor="categoryId">Category</label>
+                                        <label htmlFor="categoryId">Danh mục công việc</label>
                                         <Input
                                             type="select"
                                             id="categoryId"
@@ -161,7 +177,7 @@ const CreateJob = () => {
                                     </FormGroup>
 
                                     <Button type="submit" color="primary">
-                                        Create Job
+                                        Thêm công việc
                                     </Button>
                                 </Form>
                             </CardBody>
