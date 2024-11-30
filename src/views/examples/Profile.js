@@ -184,7 +184,7 @@ const Profile = () => {
                     onClick={(e) => e.preventDefault()}
                     size="sm"
                   >
-                    Connect
+                    Kết nối
                   </Button>
                   <Button
                     className="float-right"
@@ -193,7 +193,7 @@ const Profile = () => {
                     onClick={(e) => e.preventDefault()}
                     size="sm"
                   >
-                    Message
+                    Tin nhắn
                   </Button>
                 </div>
               </CardHeader>
@@ -208,7 +208,7 @@ const Profile = () => {
                     {addressName}
                   </div>
                   <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                    Show more
+                    Hiển thị thêm...
                   </a>
                 </div>
               </CardBody>
@@ -266,7 +266,7 @@ const Profile = () => {
                             value={employer.gender}
                             onChange={handleInputChange}
                           >
-                            <option value="">Select Gender</option>
+                            <option value="">Lựa chọn giới tính</option>
                             <option value="Nam">Nam</option>
                             <option value="Nữ">Nữ</option>
                             <option value="Khác">Khác</option>

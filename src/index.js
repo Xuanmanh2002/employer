@@ -16,7 +16,7 @@ root.render(
     <Routes>
       <Route path="/employer/*" element={<EmployerLayout />} />
       <Route path="/auth/*" element={<AuthLayout />} />
-      <Route path="*" element={<Navigate to="/employer/index" replace />} />
+      <Route path="*" element={<Navigate to="/employer/" replace />} />
     </Routes>
   </BrowserRouter>
 );

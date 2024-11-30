@@ -13,24 +13,34 @@ import {
 } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "components/Auth/AuthProvider";
-import { checkRoleEmployer } from "utils/ApiFunctions";
+import { checkRoleEmployer, getAllCartItems } from "utils/ApiFunctions";
 
 const EmployerNavbar = (props) => {
   const { handleLogout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   const [employer, setEmployer] = useState({
     firstName: "",
     lastName: "",
     avatar: "",
-    roles: [{ id: "", name: "" }]
+    roles: [{ id: "", name: "" }],
   });
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const fetchemployerData = () => {
+    const fetchCartItems = async () => {
+      try {
+        const items = await getAllCartItems();
+        setCartItemCount(items.length);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    };
+
+    const fetchEmployerData = () => {
       const storedFirstName = localStorage.getItem("firstName");
       const storedLastName = localStorage.getItem("lastName");
       const storedAvatar = localStorage.getItem("avatar");
@@ -51,7 +61,8 @@ const EmployerNavbar = (props) => {
       return;
     }
 
-    fetchemployerData();
+    fetchEmployerData();
+    fetchCartItems();
 
     const verifyRole = async () => {
       try {
@@ -96,15 +107,19 @@ const EmployerNavbar = (props) => {
             {props.brandText}
           </Link>
           <Nav className="align-items-center d-none d-md-flex" navbar>
-            <Button color="link" className="text-white position-relative" onClick={() => navigate("/employer/cart")}>
+            <Button
+              color="link"
+              className="text-white position-relative"
+              onClick={() => navigate("/employer/cart")}
+            >
               <i className="ni ni-cart" />
               <Badge
                 color="danger"
                 pill
                 className="position-absolute"
-                style={{ top: '0', right: '-10px', fontSize: '0.75rem' }}
+                style={{ top: "0", right: "-10px", fontSize: "0.75rem" }}
               >
-                1
+                {cartItemCount}
               </Badge>
             </Button>
 
@@ -131,11 +146,7 @@ const EmployerNavbar = (props) => {
                   <span className="avatar avatar-sm rounded-circle">
                     <img
                       alt="Avatar"
-                      src={
-                        employer.avatar
-                          ? `data:image/jpeg;base64,${employer.avatar}`
-                          : require("../../assets/img/theme/team-4-800x800.jpg")
-                      }
+                      src={`data:image/jpeg;base64,${employer.avatar}`}
                     />
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
@@ -147,11 +158,11 @@ const EmployerNavbar = (props) => {
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-arrow" right>
                 <DropdownItem className="noti-title" header tag="div">
-                  <h6 className="text-overflow m-0">Welcome!</h6>
+                  <h6 className="text-overflow m-0">Chào mừng!</h6>
                 </DropdownItem>
                 <DropdownItem to="/employer/user-profile" tag={Link}>
                   <i className="ni ni-single-02" />
-                  <span>My profile</span>
+                  <span>Hồ sơ của tôi</span>
                 </DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem
@@ -162,7 +173,7 @@ const EmployerNavbar = (props) => {
                   }}
                 >
                   <i className="ni ni-user-run" />
-                  <span>Logout</span>
+                  <span>Đăng xuất</span>
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>

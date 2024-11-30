@@ -151,6 +151,8 @@ const Job = () => {
                     <th scope="col">Vị trí công viêc</th>
                     <th scope="col">Kinh nghiệm</th>
                     <th scope="col">Thời hạn nạp hồ sơ</th>
+                    <th scope="col">Active</th>
+                    <th scope="col">Thời hạn dịch vụ</th>
                     <th scope="col">Chi tiết công việc</th>
                     <th scope="col">Dannh mục công việc</th>
                     <th scope="col">Ngày khởi tạo</th>
@@ -177,6 +179,21 @@ const Job = () => {
                         <td>{job.jobName}</td>
                         <td>{job.experience}<span> năm</span></td>
                         <td>{job.applicationDeadline ? format(new Date(job.applicationDeadline), "dd/MM/yyyy") : "N/A"}</td>
+                        <td>
+                          <span className={job.status ? "text-success" : "text-danger"}>
+                            {job.status ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td>
+                          {job.activationDate && job.totalValidityPeriod
+                            ? format(
+                              new Date(job.activationDate).setDate(
+                                new Date(job.activationDate).getDate() + job.totalValidityPeriod
+                              ),
+                              "dd/MM/yyyy"
+                            )
+                            : "N/A"}
+                        </td>
                         <td>{job.recruitmentDetails}</td>
                         <td>{job.categoryName || "N/A"}</td>
                         <td>{job.createAt ? format(new Date(job.createAt), "dd/MM/yyyy") : "N/A"}</td>

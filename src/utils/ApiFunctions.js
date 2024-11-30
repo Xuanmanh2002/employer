@@ -100,38 +100,38 @@ export async function registerEmployer(registration) {
 }
 
 export async function updateEmployer(email, firstName, lastName, gender, avatarFile, addressId, telephone, birthDate, companyName) {
-    const formData = new FormData();
-    formData.append("firstName", firstName);
-    formData.append("lastName", lastName);
-    formData.append("gender", gender);
-    formData.append("telephone", telephone);
-    formData.append("addressId", addressId);
+	const formData = new FormData();
+	formData.append("firstName", firstName);
+	formData.append("lastName", lastName);
+	formData.append("gender", gender);
+	formData.append("telephone", telephone);
+	formData.append("addressId", addressId);
 	formData.append("companyName", companyName)
-    
-    if (birthDate) {
-        formData.append("birthDate", birthDate);
-    }
 
-    if (avatarFile) {
-        formData.append("avatar", avatarFile); 
-    }
+	if (birthDate) {
+		formData.append("birthDate", birthDate);
+	}
 
-    try {
-        const response = await api.put(`/employer/update/${email}`, formData, {
-            headers: {
-                ...getHeader(),
-                'Content-Type': 'multipart/form-data' 
-            },
-        });
+	if (avatarFile) {
+		formData.append("avatar", avatarFile);
+	}
 
-        if (response.status >= 200 && response.status < 300) {
-            return response.data; 
-        } else {
-            throw new Error(`Update failed with status: ${response.status}`);
-        }
-    } catch (error) {
-        throw new Error(error.response?.data?.message || "Error updating employer.");
-    }
+	try {
+		const response = await api.put(`/employer/update/${email}`, formData, {
+			headers: {
+				...getHeader(),
+				'Content-Type': 'multipart/form-data'
+			},
+		});
+
+		if (response.status >= 200 && response.status < 300) {
+			return response.data;
+		} else {
+			throw new Error(`Update failed with status: ${response.status}`);
+		}
+	} catch (error) {
+		throw new Error(error.response?.data?.message || "Error updating employer.");
+	}
 }
 
 export async function getEmployer(email, token) {
@@ -182,7 +182,8 @@ export async function getAllJob() {
 		throw new Error(`Error fetching job: ${error.response?.data?.message || error.message}`);
 	}
 }
-export async function createJob(jobName, experience, price,applicationDeadline, recruitmentDetails, categoryId) {
+
+export async function createJob(jobName, experience, price, applicationDeadline, recruitmentDetails, categoryId) {
 	const data = {
 		jobName: jobName,
 		experience: experience,
@@ -284,5 +285,203 @@ export async function getAllAddress() {
 	} catch (error) {
 		console.error("Error fetching address:", error);
 		throw new Error(`Error fetching address: ${error.response?.data?.message || error.message}`);
+	}
+}
+
+export async function getAllCartItems() {
+	try {
+		const result = await api.get("/api/cart/all-item", {
+			headers: getHeader()
+		});
+		if (result.status === 204 || !result.data || result.data.length === 0) {
+			return [];
+		}
+		return result.data;
+	} catch (error) {
+		console.error("Error fetching cart items:", error);
+		throw new Error(`Error fetching cart items: ${error.response?.data?.message || error.message}`);
+	}
+}
+
+export async function addItemToCart(serviceId, quantity) {
+	try {
+		const response = await api.post("/api/cart/create", null, {
+			headers: getHeader(),
+			params: {
+				serviceId,
+				quantity,
+			}
+		});
+		if (response.status === 200) {
+			return response.data;
+		} else {
+			throw new Error("Failed to add item to cart");
+		}
+	} catch (error) {
+		console.error("Error adding item to cart:", error);
+		throw new Error(error.message || "Error adding item to cart");
+	}
+}
+
+
+export async function updateCartItem(serviceId, quantity) {
+	try {
+		const response = await api.put("/api/cart/update", null, {
+			headers: getHeader(),
+			params: { serviceId, quantity },
+		});
+		if (response.status === 200) {
+			return {
+				success: true,
+				message: "Cập nhật giỏ hàng thành công",
+				data: response.data,
+			};
+		} else {
+			return {
+				success: false,
+				message: "Cập nhật giỏ hàng thất bại",
+			};
+		}
+	} catch (error) {
+		return {
+			success: false,
+			message: error.response ? error.response.data : error.message,
+		};
+	}
+}
+
+export async function deleteCartItem(serviceId) {
+	try {
+		const response = await api.delete("/api/cart/delete", {
+			headers: getHeader(),
+			params: { serviceId },
+		});
+		if (response.status === 200) {
+			return {
+				success: true,
+				message: "Item deleted from cart successfully",
+			};
+		} else {
+			return {
+				success: false,
+				message: "Failed to delete item from cart",
+			};
+		}
+	} catch (error) {
+		console.error("Error deleting cart item:", error);
+		return {
+			success: false,
+			message: error.response ? error.response.data.message : error.message,
+		};
+	}
+}
+
+export async function getCartByEmployer() {
+	try {
+		const response = await api.get("/api/cart/cart-by-employer", {
+			headers: getHeader(),
+		});
+
+		if (response.status >= 200 && response.status < 300) {
+			return response.data;
+		} else {
+			throw new Error(`Failed to fetch cart with status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching employer's cart:", error);
+		throw new Error(error.response?.data?.message || "Error fetching employer's cart");
+	}
+}
+export async function createOrder(cart) {
+	try {
+		const response = await api.post(`/api/order/create?cart=${cart}`, null, {
+			headers: getHeader(),
+		});
+
+		if (response.status === 200) {
+			console.log("Order created successfully:", response.data);
+		} else {
+			throw new Error("Failed to create order");
+		}
+	} catch (error) {
+		console.error("Error creating order:", error.message);
+	}
+}
+
+export async function getApplicationsByEmployer() {
+	try {
+		const token = localStorage.getItem("token");
+
+		if (!token) {
+			throw new Error("No token found. Please log in again.");
+		}
+		const response = await api.get("/api/application-documents/list-applications", {
+			headers: getHeader(),
+		});
+		if (response.status >= 200 && response.status < 300) {
+			return response.data;
+		} else {
+			throw new Error(`Failed to fetch applications with status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching applications:", error);
+		throw new Error(error.response?.data?.message || error.message);
+	}
+}
+
+export async function deleteApplicationDocuments(applicationDocumentsId) {
+	try {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			throw new Error("No token found. Please log in again.");
+		}
+		const response = await api.delete(`/api/application-documents/delete/${applicationDocumentsId}`, {
+			headers: getHeader(),
+		});
+
+		if (response.status === 200) {
+			console.log("Application document deleted successfully");
+			return response.data;
+		} else {
+			throw new Error(`Failed to delete application document: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error deleting application document:", error);
+		throw new Error(`Error deleting application document: ${error.message}`);
+	}
+}
+
+export async function getOrderDetails() {
+	try {
+		const response = await api.get("/api/order/order-details", {
+			headers: getHeader(),
+		});
+
+		if (response.status >= 200 && response.status < 300) {
+			return response.data;
+		} else {
+			throw new Error(`Failed to fetch order details with status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching order details:", error);
+		throw new Error(error.response?.data?.message || error.message);
+	}
+}
+
+export async function deleteOrderDetail(serviceId) {
+	try {
+		const response = await api.delete(`/api/order/delete-order-details`, {
+			headers: getHeader(),
+			params: { serviceId },
+		});
+		if (response.status === 200) {
+			console.log("Order detail deleted successfully:", response.data);
+			return response.data;
+		} else {
+			throw new Error("Failed to delete order detail.");
+		}
+	} catch (error) {
+		console.error("Error deleting order detail:", error);
+		throw new Error(error.response?.data?.message || error.message);
 	}
 }

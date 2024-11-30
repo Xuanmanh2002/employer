@@ -48,7 +48,7 @@ const Employer = (props) => {
         routes={routes}
         logo={{
           innerLink: "/employer/index",
-          imgSrc: require("../assets/img/brand/argon-react.png"),
+          imgSrc: require("../assets/img/brand/Logo_TopCV.png"),
           imgAlt: "...",
         }}
       />
@@ -59,7 +59,7 @@ const Employer = (props) => {
         />
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/employer/index" replace />} />
+          <Route path="*" element={<Navigate to="/employer/" replace />} />
         </Routes>
         <Container fluid>
           <EmployerFooter />

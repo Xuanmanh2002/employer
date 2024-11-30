@@ -10,21 +10,23 @@ import {
     Col,
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
-import { getAllService } from "utils/ApiFunctions";
+import { getAllService, addItemToCart } from "utils/ApiFunctions";
 import { FaShoppingCart } from "react-icons/fa";
+import { notification } from "antd"; 
 
 const Service = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [expandedStates, setExpandedStates] = useState([]); 
+    const [expandedStates, setExpandedStates] = useState([]);
+    const [addingToCart, setAddingToCart] = useState([]); 
+
     useEffect(() => {
         const fetchServices = async () => {
             try {
                 const data = await getAllService();
                 setServices(data);
                 setError("");
-                // Khởi tạo trạng thái mở rộng cho tất cả dịch vụ
                 setExpandedStates(new Array(data.length).fill(false));
             } catch (error) {
                 setError(error.message);
@@ -38,8 +40,28 @@ const Service = () => {
 
     const toggleExpand = (index) => {
         const newExpandedStates = [...expandedStates];
-        newExpandedStates[index] = !newExpandedStates[index]; 
+        newExpandedStates[index] = !newExpandedStates[index];
         setExpandedStates(newExpandedStates);
+    };
+
+    const handleAddToCart = async (serviceId) => {
+        try {
+            setAddingToCart(prevState => [...prevState, serviceId]);
+            await addItemToCart(serviceId, 1); 
+            setAddingToCart(prevState => prevState.filter(id => id !== serviceId)); 
+            notification.success({
+                message: 'Thêm vào giỏ hàng thành công!',
+                description: 'Dịch vụ đã được thêm vào giỏ hàng của bạn.',
+                placement: 'topRight',
+            });
+        } catch (error) {
+            setAddingToCart(prevState => prevState.filter(id => id !== serviceId)); 
+            notification.error({
+                message: 'Có lỗi xảy ra',
+                description: error.message,
+                placement: 'topRight', 
+            });
+        }
     };
 
     return (
@@ -92,10 +114,15 @@ const Service = () => {
                                                 color: "green",
                                             }}
                                             className="me-2"
+                                            onClick={(e) =>{e.preventDefault(); handleAddToCart(service.id)}}
+                                            disabled={addingToCart.includes(service.id)}
                                         >
-                                            <FaShoppingCart className="me-1" /> Thêm vào giỏ
+                                            {addingToCart.includes(service.id) ? "Đang thêm..." : <><FaShoppingCart className="me-1" /> Thêm vào giỏ</>}
                                         </Button>
-                                        <Button color="success">Mua ngay</Button>
+                                        <Button
+                                            onClick={(e) =>{e.preventDefault(); handleAddToCart(service.id)}}
+                                            disabled={addingToCart.includes(service.id)}
+                                            color="success"> Mua ngay</Button>
                                         <Button
                                             color="link"
                                             onClick={() => toggleExpand(index)}
