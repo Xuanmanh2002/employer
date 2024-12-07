@@ -12,14 +12,16 @@ import {
 import Header from "components/Headers/Header.js";
 import { getAllService, addItemToCart } from "utils/ApiFunctions";
 import { FaShoppingCart } from "react-icons/fa";
-import { notification } from "antd"; 
+import { notification } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const Service = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [expandedStates, setExpandedStates] = useState([]);
-    const [addingToCart, setAddingToCart] = useState([]); 
+    const [addingToCart, setAddingToCart] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -47,19 +49,19 @@ const Service = () => {
     const handleAddToCart = async (serviceId) => {
         try {
             setAddingToCart(prevState => [...prevState, serviceId]);
-            await addItemToCart(serviceId, 1); 
-            setAddingToCart(prevState => prevState.filter(id => id !== serviceId)); 
+            await addItemToCart(serviceId, 1);
+            setAddingToCart(prevState => prevState.filter(id => id !== serviceId));
             notification.success({
                 message: 'Thêm vào giỏ hàng thành công!',
                 description: 'Dịch vụ đã được thêm vào giỏ hàng của bạn.',
                 placement: 'topRight',
             });
         } catch (error) {
-            setAddingToCart(prevState => prevState.filter(id => id !== serviceId)); 
+            setAddingToCart(prevState => prevState.filter(id => id !== serviceId));
             notification.error({
                 message: 'Có lỗi xảy ra',
                 description: error.message,
-                placement: 'topRight', 
+                placement: 'topRight',
             });
         }
     };
@@ -92,17 +94,19 @@ const Service = () => {
                             <Col md="4" key={index} className="mb-4">
                                 <Card>
                                     <CardBody>
-                                        <CardTitle tag="h5" className="text-success">
+                                        <CardTitle onClick={() => navigate(`/employer/mua-dich-vu/chi-tiet-dich-vu/${service.id}`)}
+                                            style={{ cursor: "pointer" }} tag="h5" className="text-success">
                                             {service.serviceName}
                                         </CardTitle>
                                         <h2 className="text-danger">
                                             {service.price.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                                         </h2>
-                                        <CardText
+                                        <CardText onClick={() => navigate(`/employer/mua-dich-vu/chi-tiet-dich-vu/${service.id}`)}
                                             style={{
                                                 maxHeight: expandedStates[index] ? "none" : "100px",
                                                 overflow: "hidden",
                                                 transition: "max-height 0.3s ease",
+                                                cursor: "pointer" 
                                             }}
                                         >
                                             {service.description}
@@ -114,13 +118,13 @@ const Service = () => {
                                                 color: "green",
                                             }}
                                             className="me-2"
-                                            onClick={(e) =>{e.preventDefault(); handleAddToCart(service.id)}}
+                                            onClick={(e) => { e.preventDefault(); handleAddToCart(service.id) }}
                                             disabled={addingToCart.includes(service.id)}
                                         >
                                             {addingToCart.includes(service.id) ? "Đang thêm..." : <><FaShoppingCart className="me-1" /> Thêm vào giỏ</>}
                                         </Button>
                                         <Button
-                                            onClick={(e) =>{e.preventDefault(); handleAddToCart(service.id)}}
+                                            onClick={(e) => { e.preventDefault(); handleAddToCart(service.id) }}
                                             disabled={addingToCart.includes(service.id)}
                                             color="success"> Mua ngay</Button>
                                         <Button

@@ -110,7 +110,7 @@ const EmployerNavbar = (props) => {
             <Button
               color="link"
               className="text-white position-relative"
-              onClick={() => navigate("/employer/cart")}
+              onClick={() => navigate("/employer/gio-hang")}
             >
               <i className="ni ni-cart" />
               <Badge

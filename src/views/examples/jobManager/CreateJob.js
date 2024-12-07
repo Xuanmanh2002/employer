@@ -13,6 +13,7 @@ import {
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import { createJob, getAllCategories } from "utils/ApiFunctions";
+import { notification } from "antd";
 
 const CreateJob = () => {
     const [jobDetails, setJobDetails] = useState({
@@ -21,10 +22,12 @@ const CreateJob = () => {
         price: "",
         applicationDeadline: "",
         recruitmentDetails: "",
-        categoryId: "", 
+        categoryId: "",
+        ranker: "",
+        quantity: "",
+        workingForm: "",
+        gender: "",
     });
-    const [errorMessage, setErrorMessage] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -33,7 +36,10 @@ const CreateJob = () => {
                 const result = await getAllCategories();
                 setCategories(result);
             } catch (error) {
-                setErrorMessage("Error fetching categories");
+                notification.error({
+                    message: "Lỗi",
+                    description: "Không thể tải danh mục công việc.",
+                });
             }
         };
         fetchCategories();
@@ -54,25 +60,41 @@ const CreateJob = () => {
                 jobDetails.price,
                 jobDetails.applicationDeadline,
                 jobDetails.recruitmentDetails,
-                jobDetails.categoryId 
+                jobDetails.categoryId,
+                jobDetails.ranker,
+                jobDetails.quantity,
+                jobDetails.workingForm,
+                jobDetails.gender
             );
 
             if (response.success) {
-                setSuccessMessage(response.message);
+                notification.success({
+                    message: "Thành công",
+                    description: response.message || "Công việc đã được thêm.",
+                });
                 setJobDetails({
                     jobName: "",
                     experience: "",
                     price: "",
                     applicationDeadline: "",
                     recruitmentDetails: "",
-                    categoryId: "", 
+                    categoryId: "",
+                    ranker: "",
+                    quantity: "",
+                    workingForm: "",
+                    gender: "",
                 });
-                setErrorMessage("");
             } else {
-                setErrorMessage(response.message);
+                notification.error({
+                    message: "Lỗi",
+                    description: response.message || "Không thể thêm công việc.",
+                });
             }
         } catch (error) {
-            setErrorMessage(error.message);
+            notification.error({
+                message: "Lỗi",
+                description: error.message || "Đã xảy ra lỗi khi thêm công việc.",
+            });
         }
     };
 
@@ -88,18 +110,13 @@ const CreateJob = () => {
                             </CardHeader>
                             <CardBody>
                                 <Form role="form" onSubmit={handleSubmit}>
-                                    {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-                                    {successMessage && (
-                                        <div className="success-message">{successMessage}</div>
-                                    )}
-
                                     <FormGroup>
                                         <label htmlFor="jobName">Tên công việc</label>
                                         <Input
                                             type="text"
                                             id="jobName"
                                             name="jobName"
-                                            placeholder="Enter job name"
+                                            placeholder="Nhập tên công việc"
                                             value={jobDetails.jobName}
                                             onChange={handleInputChange}
                                             required
@@ -112,7 +129,7 @@ const CreateJob = () => {
                                             type="text"
                                             id="experience"
                                             name="experience"
-                                            placeholder="Enter experience required"
+                                            placeholder="Nhập kinh nghiệm yêu cầu"
                                             value={jobDetails.experience}
                                             onChange={handleInputChange}
                                             required
@@ -125,8 +142,9 @@ const CreateJob = () => {
                                             type="text"
                                             id="price"
                                             name="price"
-                                            placeholder="Enter price required"
+                                            placeholder="Nhập lương đề xuất"
                                             value={jobDetails.price}
+                                            min="0"
                                             onChange={handleInputChange}
                                             required
                                         />
@@ -145,12 +163,78 @@ const CreateJob = () => {
                                     </FormGroup>
 
                                     <FormGroup>
+                                        <label htmlFor="ranker">Chức vụ</label>
+                                        <Input
+                                            type="select"
+                                            id="ranker"
+                                            name="ranker"
+                                            value={jobDetails.ranker}
+                                            onChange={handleInputChange}
+                                            required
+                                        >
+                                            <option value="">Chọn chức vụ</option>
+                                            <option value="Thực tập sinh">Thực tập sinh</option>
+                                            <option value="Nhân viên">Nhân viên</option>
+                                            <option value="Quản lý">Quản lý</option>
+                                            <option value="Giám đốc">Giám đốc</option>
+                                        </Input>
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <label htmlFor="ranker">Giới tính</label>
+                                        <Input
+                                            type="select"
+                                            id="gender"
+                                            name="gender"
+                                            value={jobDetails.gender}
+                                            onChange={handleInputChange}
+                                            required
+                                        >
+                                            <option value="">Chọn giới tính</option>
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Không yêu cầu</option>
+                                        </Input>
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <label htmlFor="quantity">Số lượng nhân viên</label>
+                                        <Input
+                                            type="text"
+                                            id="quantity"
+                                            name="quantity"
+                                            placeholder="Số lượng nhân viên"
+                                            value={jobDetails.quantity}
+                                            min="1"
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <label htmlFor="workingForm">Hình thức làm việc</label>
+                                        <Input
+                                            type="select"
+                                            id="workingForm"
+                                            name="workingForm"
+                                            value={jobDetails.workingForm}
+                                            onChange={handleInputChange}
+                                            required
+                                        >
+                                            <option value="">Chọn hình thức làm việc</option>
+                                            <option value="Toàn thời gian">Toàn thời gian</option>
+                                            <option value="Bán thời gian">Bán thời gian</option>
+                                            <option value="Tự do">Tự do</option>
+                                        </Input>
+                                    </FormGroup>
+
+                                    <FormGroup>
                                         <label htmlFor="recruitmentDetails">Chi tiết tuyển dụng</label>
                                         <Input
                                             type="textarea"
                                             id="recruitmentDetails"
                                             name="recruitmentDetails"
-                                            placeholder="Enter recruitment details"
+                                            placeholder="Nhập thông tin tuyển dụng"
                                             value={jobDetails.recruitmentDetails}
                                             onChange={handleInputChange}
                                             required
@@ -162,15 +246,15 @@ const CreateJob = () => {
                                         <Input
                                             type="select"
                                             id="categoryId"
-                                            name="categoryId" 
+                                            name="categoryId"
                                             value={jobDetails.categoryId}
                                             onChange={handleInputChange}
                                             required
                                         >
-                                            <option value="">Select a category</option>
+                                            <option value="">Chọn một danh mục công việc</option>
                                             {categories.map((category) => (
                                                 <option key={category.id} value={category.id}>
-                                                    {category.categoryName} 
+                                                    {category.categoryName}
                                                 </option>
                                             ))}
                                         </Input>

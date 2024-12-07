@@ -15,6 +15,8 @@ import {
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { registerEmployer, getAllAddress } from "utils/ApiFunctions";
+import { LuScale } from "react-icons/lu";
+import { FiBox } from "react-icons/fi";
 
 const Register = () => {
   const [registration, setRegistration] = useState({
@@ -26,9 +28,12 @@ const Register = () => {
     telephone: "",
     addressId: "",
     companyName: "",
+    scale: "",
+    fieldActivity: "",
     email: "",
-    password: ""
+    password: "",
   });
+  const [previewAvatar, setPreviewAvatar] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -54,14 +59,18 @@ const Register = () => {
   };
 
   const handleFileChange = (e) => {
-    setRegistration((prev) => ({ ...prev, avatar: e.target.files[0] }));
+    const file = e.target.files[0];
+    setRegistration((prev) => ({ ...prev, avatar: file }));
+    if (file) {
+      setPreviewAvatar(URL.createObjectURL(file));
+    }
   };
 
   const handleRegistration = async (e) => {
     e.preventDefault();
 
     try {
-      await registerEmployer(registration); 
+      await registerEmployer(registration);
       setSuccessMessage("Registration successful!");
       setErrorMessage("");
       navigate("/auth/login");
@@ -69,20 +78,19 @@ const Register = () => {
       setSuccessMessage("");
       setErrorMessage(`Registration error: ${error.message || "Unknown error"}`);
     }
-    
+
     setTimeout(() => {
       setErrorMessage("");
       setSuccessMessage("");
     }, 5000);
   };
-
   return (
     <>
       <Col lg="6" md="8">
         <Card className="bg-secondary shadow border-0">
           <CardHeader className="bg-transparent pb-5">
             <div className="text-muted text-center mt-2 mb-4">
-              <small>Sign up with</small>
+              <small>Đăng ký với</small>
             </div>
             <div className="text-center">
               <Button
@@ -123,7 +131,7 @@ const Register = () => {
           </CardHeader>
           <CardBody className="px-lg-5 py-lg-5">
             <div className="text-center text-muted mb-4">
-              <small>Or sign up with credentials</small>
+              <small>Hoặc đăng ký bằng thông tin đăng nhập</small>
               {errorMessage && <p className="alert alert-danger">{errorMessage}</p>}
               {successMessage && <p className="alert alert-success">{successMessage}</p>}
             </div>
@@ -136,7 +144,7 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="First name"
+                    placeholder="Họ"
                     id="firstName"
                     name="firstName"
                     type="text"
@@ -154,7 +162,7 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Last name"
+                    placeholder="Tên"
                     id="lastName"
                     name="lastName"
                     type="text"
@@ -172,7 +180,7 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Birth Date"
+                    placeholder="Năm sinh"
                     id="birthDate"
                     name="birthDate"
                     type="date"
@@ -197,28 +205,40 @@ const Register = () => {
                     value={registration.gender}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select Gender</option>
+                    <option value="">Chọn giới tính</option>
                     <option value="Nam">Nam</option>
                     <option value="Nữ">Nữ</option>
                   </Input>
                 </InputGroup>
               </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative mb-3">
-                  <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                      <i className="ni ni-image" />
-                    </InputGroupText>
-                  </InputGroupAddon>
+              <FormGroup className="text-center">
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <img
+                    src={previewAvatar || "https://www.topcv.vn/images/avatar-default.jpg"}
+                    alt="Avatar"
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => document.getElementById("avatarInput").click()}
+                  />
                   <Input
-                    placeholder="Avatar"
-                    id="avatar"
-                    name="avatar"
                     type="file"
-                    className="form-control"
+                    id="avatarInput"
+                    name="avatar"
+                    style={{ display: "none" }}
+                    accept="image/*"
                     onChange={handleFileChange}
                   />
-                </InputGroup>
+                </div>
+                {previewAvatar && (
+                  <p className="text-muted mt-2" style={{ fontSize: "12px" }}>
+                    Nhấn vào ảnh để thay đổi
+                  </p>
+                )}
               </FormGroup>
               <FormGroup>
                 <InputGroup className="input-group-alternative mb-3">
@@ -228,7 +248,7 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Telephone"
+                    placeholder="Số điện thoại"
                     id="telephone"
                     name="telephone"
                     type="text"
@@ -251,7 +271,7 @@ const Register = () => {
                     value={registration.addressId}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select Address</option>
+                    <option value="">Chọn địa chỉ</option>
                     {addresses.map((address) => (
                       <option key={address.id} value={address.id}>
                         {address.name}
@@ -268,12 +288,46 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Company name"
+                    placeholder="Tên công ty"
                     id="companyName"
                     name="companyName"
                     type="text"
                     className="form-control"
                     value={registration.companyName}
+                    onChange={handleInputChange} />
+                </InputGroup>
+              </FormGroup>
+              <FormGroup>
+                <InputGroup className="input-group-alternative mb-3">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText>
+                      <LuScale />
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                    placeholder="Quy mô"
+                    id="scale"
+                    name="scale"
+                    type="text"
+                    className="form-control"
+                    value={registration.scale}
+                    onChange={handleInputChange} />
+                </InputGroup>
+              </FormGroup>
+              <FormGroup>
+                <InputGroup className="input-group-alternative mb-3">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText>
+                      <FiBox />
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                    placeholder="Lĩnh vực"
+                    id="fieldActivity"
+                    name="fieldActivity"
+                    type="text"
+                    className="form-control"
+                    value={registration.fieldActivity}
                     onChange={handleInputChange} />
                 </InputGroup>
               </FormGroup>
@@ -304,7 +358,7 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Password"
+                    placeholder="Mật khẩu"
                     id="password"
                     name="password"
                     type="password"
@@ -317,8 +371,8 @@ const Register = () => {
               </FormGroup>
               <div className="text-muted font-italic">
                 <small>
-                  password strength:{" "}
-                  <span className="text-success font-weight-700">strong</span>
+                  độ mạnh của mật khẩu:{" "}
+                  <span className="text-success font-weight-700">mạnh</span>
                 </small>
               </div>
               <Row className="my-4">
@@ -334,9 +388,9 @@ const Register = () => {
                       htmlFor="customCheckRegister"
                     >
                       <span className="text-muted">
-                        I agree with the{" "}
+                        Tôi đồng ý với{" "}
                         <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                          Privacy Policy
+                          Chính sách bảo mật
                         </a>
                       </span>
                     </label>
@@ -345,7 +399,7 @@ const Register = () => {
               </Row>
               <div className="text-center">
                 <Button className="mt-4" color="primary" type="submit">
-                  Create account
+                  Tạo mới tài khoản
                 </Button>
               </div>
             </Form>

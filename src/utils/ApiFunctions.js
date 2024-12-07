@@ -79,6 +79,9 @@ export async function registerEmployer(registration) {
 		formData.append("telephone", registration.telephone);
 		formData.append("addressId", registration.addressId);
 		formData.append("companyName", registration.companyName);
+		formData.append("scale", registration.scale);
+		formData.append("fieldActivity", registration.fieldActivity);
+
 		if (registration.avatar) {
 			formData.append("avatar", registration.avatar);
 		}
@@ -183,39 +186,55 @@ export async function getAllJob() {
 	}
 }
 
-export async function createJob(jobName, experience, price, applicationDeadline, recruitmentDetails, categoryId) {
-	const data = {
-		jobName: jobName,
-		experience: experience,
-		price: price,
-		applicationDeadline: applicationDeadline,
-		recruitmentDetails: recruitmentDetails,
-		categoryId: categoryId,
-	};
+export async function createJob(
+    jobName,
+    experience,
+    price,
+    applicationDeadline,
+    recruitmentDetails,
+    categoryId,
+    ranker,
+    quantity,
+    workingForm,
+    gender
+) {
+    const data = {
+        jobName,
+        experience,
+        price,
+        applicationDeadline,
+        recruitmentDetails,
+        categoryId,
+        ranker,
+        quantity,
+        workingForm,
+        gender,
+    };
 
-	try {
-		const response = await api.post("/employer/job/create", data, {
-			headers: getHeader(),
-		});
-		if (response.status === 200 && response.data.status === "success") {
-			return {
-				success: true,
-				message: response.data.message,
-			};
-		} else {
-			return {
-				success: false,
-				message: response.data.message || "Failed to create job",
-			};
-		}
-	} catch (error) {
-		return {
-			success: false,
-			message: error.response ? error.response.data.message : error.message,
-		};
-	}
+    try {
+        const response = await api.post("/employer/job/create", data, {
+            headers: getHeader(),
+        });
+
+        if (response.status === 200 && response.data.status === "success") {
+            return {
+                success: true,
+                message: response.data.message || "Job created successfully",
+                job: response.data.job,
+            };
+        } else {
+            return {
+                success: false,
+                message: response.data.message || "Failed to create job",
+            };
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || "Internal server error",
+        };
+    }
 }
-
 export async function deleteJob(jobId) {
 	try {
 		const result = await api.delete(`/employer/job/delete/${jobId}`, {
@@ -235,6 +254,10 @@ export async function updateJob(jobId, updatedJob) {
 		applicationDeadline: updatedJob.applicationDeadline,
 		recruitmentDetails: updatedJob.recruitmentDetails,
 		categoryId: updatedJob.categoryId,
+		ranker: updatedJob.ranker,
+		workingForm: updatedJob.workingForm,
+		quantity: updatedJob.quantity,
+		gender: updatedJob.gender,
 	};
 
 	try {
@@ -482,6 +505,23 @@ export async function deleteOrderDetail(serviceId) {
 		}
 	} catch (error) {
 		console.error("Error deleting order detail:", error);
+		throw new Error(error.response?.data?.message || error.message);
+	}
+}
+
+export async function getServicePackById(serviceId) {
+	try {
+		const response = await api.get(`/admin/service/${serviceId}`, {
+			headers: getHeader(),
+		});
+
+		if (response.status === 200) {
+			return response.data;
+		} else {
+			throw new Error(`Failed to fetch ServicePack with status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching ServicePack:", error);
 		throw new Error(error.response?.data?.message || error.message);
 	}
 }

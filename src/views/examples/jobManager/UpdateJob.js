@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { updateJob, checkRoleEmployer, getAllCategories } from "utils/ApiFunctions";
 import { Button, Form, FormGroup, Input, Container, Row, Col, Card, CardBody, CardHeader, Alert, Spinner } from "reactstrap";
 import Header from "components/Headers/Header.js";
-import { format} from "date-fns";
+import { format } from "date-fns";
 
 const UpdateJob = () => {
     const { id } = useParams();
@@ -15,9 +15,15 @@ const UpdateJob = () => {
         jobName: job.jobName || "",
         experience: job.experience || "",
         price: job.price || "",
-        applicationDeadline: job.applicationDeadline || "",
+        applicationDeadline: job.applicationDeadline
+            ? format(new Date(job.applicationDeadline), "yyyy-MM-dd")
+            : "",
         recruitmentDetails: job.recruitmentDetails || "",
         categoryId: job.categoryId || "",
+        ranker: job.ranker || "",
+        quantity: job.quantity || "",
+        workingForm: job.workingForm || "",
+        gender: job.gender || "",
     });
 
     const [categories, setCategories] = useState([]);
@@ -34,7 +40,7 @@ const UpdateJob = () => {
 
                 if (!token) {
                     setErrorMessage("No token found. Please log in as an employer.");
-                    navigate("/auth/login");
+                    navigate("/auth/dang-nhap");
                     return;
                 }
 
@@ -42,7 +48,7 @@ const UpdateJob = () => {
                 setIsEmployer(role);
                 if (!role) {
                     setErrorMessage("Access restricted to employers only.");
-                    navigate("/auth/login");
+                    navigate("/auth/dang-nhap");
                 } else {
                     const categoriesData = await getAllCategories();
                     setCategories(categoriesData);
@@ -61,31 +67,42 @@ const UpdateJob = () => {
         setUpdatedJob({ ...updatedJob, [name]: value });
     };
 
+    const clearMessages = () => {
+        setErrorMessage("");
+        setSuccessMessage("");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        clearMessages();
         if (!isEmployer) return;
-    
+
         try {
             setLoading(true);
             const result = await updateJob(id, updatedJob);
             if (result.success) {
                 setSuccessMessage(result.message);
-                setErrorMessage("");
             } else {
                 setErrorMessage(result.message);
             }
         } catch (error) {
-            setErrorMessage(error.message);
+            setErrorMessage(error.response?.data?.message || "An unexpected error occurred.");
         } finally {
             setLoading(false);
         }
     };
 
-    const formattedDate = () => {
-        if (!job.applicationDeadline) return "";
-        const birth = new Date(job.applicationDeadline);
-        return isNaN(birth.getTime()) ? "" : format(birth, "yyyy-MM-dd");
-    };
+    const isFormValid = () =>
+        updatedJob.jobName &&
+        updatedJob.experience &&
+        updatedJob.price &&
+        updatedJob.applicationDeadline &&
+        updatedJob.recruitmentDetails &&
+        updatedJob.categoryId &&
+        updatedJob.ranker &&
+        updatedJob.workingForm &&
+        updatedJob.quantity &&
+        updatedJob.gender;
 
     return (
         <>
@@ -95,7 +112,7 @@ const UpdateJob = () => {
                     <Col>
                         <Card className="shadow">
                             <CardHeader className="border-0">
-                                <h3 className="mb-0">Update Job</h3>
+                                <h3 className="mb-0">Cập nhật công việc</h3>
                             </CardHeader>
                             <CardBody>
                                 {loading ? (
@@ -106,7 +123,7 @@ const UpdateJob = () => {
                                         {successMessage && <Alert color="success">{successMessage}</Alert>}
 
                                         <FormGroup>
-                                            <label htmlFor="jobName">Job Name</label>
+                                            <label htmlFor="jobName">Tên công việc</label>
                                             <Input
                                                 type="text"
                                                 id="jobName"
@@ -118,7 +135,7 @@ const UpdateJob = () => {
                                         </FormGroup>
 
                                         <FormGroup>
-                                            <label htmlFor="experience">Experience</label>
+                                            <label htmlFor="experience">Kinh nghiệm</label>
                                             <Input
                                                 type="text"
                                                 id="experience"
@@ -130,7 +147,7 @@ const UpdateJob = () => {
                                         </FormGroup>
 
                                         <FormGroup>
-                                            <label htmlFor="price">Price</label>
+                                            <label htmlFor="price">Lương</label>
                                             <Input
                                                 type="text"
                                                 id="price"
@@ -142,21 +159,86 @@ const UpdateJob = () => {
                                         </FormGroup>
 
                                         <FormGroup>
-                                            <label htmlFor="applicationDeadline">Application Deadline</label>
+                                            <label htmlFor="applicationDeadline">Hạn chót nạp đơn</label>
                                             <Input
                                                 type="date"
                                                 id="applicationDeadline"
                                                 name="applicationDeadline"
-                                                value={formattedDate()}
+                                                value={updatedJob.applicationDeadline}
                                                 onChange={handleInputChange}
                                                 required
                                             />
                                         </FormGroup>
 
                                         <FormGroup>
-                                            <label htmlFor="recruitmentDetails">Recruitment Details</label>
+                                            <label htmlFor="ranker">Chức vụ</label>
+                                            <Input
+                                                type="select"
+                                                id="ranker"
+                                                name="ranker"
+                                                value={updatedJob.ranker}
+                                                onChange={handleInputChange}
+                                                required
+                                            >
+                                                <option value="">Chọn chức vụ</option>
+                                                <option value="Thực tập sinh">Thực tập sinh</option>
+                                                <option value="Nhân viên">Nhân viên</option>
+                                                <option value="Quản lý">Quản lý</option>
+                                            </Input>
+                                        </FormGroup>
+
+                                        <FormGroup>
+                                            <label htmlFor="ranker">Giới tính</label>
+                                            <Input
+                                                type="select"
+                                                id="gender"
+                                                name="gender"
+                                                value={updatedJob.gender}
+                                                onChange={handleInputChange}
+                                                required
+                                            >
+                                                <option value="">Chọn giới tính</option>
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                                <option value="Khác">Khác</option>
+                                            </Input>
+                                        </FormGroup>
+
+                                        <FormGroup>
+                                            <label htmlFor="quantity">Số lượng nhân viên</label>
                                             <Input
                                                 type="text"
+                                                id="quantity"
+                                                name="quantity"
+                                                placeholder="Số lượng nhân viên"
+                                                value={updatedJob.quantity}
+                                                min="1"
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </FormGroup>
+
+                                        <FormGroup>
+                                            <label htmlFor="workingForm">Hình thức làm việc</label>
+                                            <Input
+                                                type="select"
+                                                id="workingForm"
+                                                name="workingForm"
+                                                value={updatedJob.workingForm}
+                                                onChange={handleInputChange}
+                                                required
+                                            >
+                                                <option value="">Chọn hình thức làm việc</option>
+                                                <option value="Toàn thời gian">Toàn thời gian</option>
+                                                <option value="Bán thời gian">Bán thời gian</option>
+                                                <option value="Tự do">Tự do</option>
+                                            </Input>
+                                        </FormGroup>
+
+                                        <FormGroup>
+                                            <label htmlFor="recruitmentDetails">Chi tiết tuyển dụng</label>
+                                            <Input
+                                                type="textarea"
                                                 id="recruitmentDetails"
                                                 name="recruitmentDetails"
                                                 value={updatedJob.recruitmentDetails}
@@ -166,7 +248,7 @@ const UpdateJob = () => {
                                         </FormGroup>
 
                                         <FormGroup>
-                                            <label htmlFor="categoryId">Category</label>
+                                            <label htmlFor="categoryId">Danh mục công việc</label>
                                             <Input
                                                 type="select"
                                                 id="categoryId"
@@ -175,7 +257,7 @@ const UpdateJob = () => {
                                                 onChange={handleInputChange}
                                                 required
                                             >
-                                                <option value="">Select Category</option>
+                                                <option value="">Chọn danh mục</option>
                                                 {categories.map((category) => (
                                                     <option key={category.id} value={category.id}>
                                                         {category.categoryName}
@@ -184,8 +266,8 @@ const UpdateJob = () => {
                                             </Input>
                                         </FormGroup>
 
-                                        <Button type="submit" color="primary" disabled={loading}>
-                                            {loading ? <Spinner size="sm" /> : "Update Job"}
+                                        <Button type="submit" color="primary" disabled={loading || !isFormValid()}>
+                                            {loading ? <Spinner size="sm" /> : "Cập nhật"}
                                         </Button>
                                     </Form>
                                 )}

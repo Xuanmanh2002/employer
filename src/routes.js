@@ -8,7 +8,8 @@ import CreateJob from "views/examples/jobManager/CreateJob";
 import UpdateJob from "views/examples/jobManager/UpdateJob";
 import Cart from "views/examples/cart/Cart";
 import ApplicationDocuments from "views/examples/applications/ApplicationDocuments";
-import MyService from "views/service/MyService";
+import MyService from "views/examples/BuyService/MyService";
+import ServiceDetail from "views/examples/BuyService/ServiceDetail";
 
 var routes = [
   {
@@ -54,31 +55,37 @@ var routes = [
     layout: "/employer",
   },
   {
-    path: "/login",
+    path: "/dang-nhap",
     component: <Login />,
     layout: "/auth",
   },
   {
-    path: "/create-job",
+    path: "/tao-moi-cong-viec",
     component: <CreateJob />,
     layout: "/employer",
   },
   {
-    path: "/register",
+    path: "/dang-ky",
     component: <Register />,
     layout: "/auth",
   },
   {
-    path: "/update-job/:id",
+    path: "/cap-nhat-cong-viec/:id",
     component: <UpdateJob />,
     layout: "/employer",
   },
 
   {
-    path: "/cart",
+    path: "/gio-hang",
     component: <Cart />,
     layout: "/employer",
-  }
+  },
+
+  {
+    path: "/mua-dich-vu/chi-tiet-dich-vu/:id",
+    component: <ServiceDetail />,
+    layout: "/employer",
+  } 
   
   
 ];

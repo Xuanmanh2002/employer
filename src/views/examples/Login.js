@@ -58,7 +58,7 @@ const Login = () => {
         <Card className="bg-secondary shadow border-0">
           <CardHeader className="bg-transparent pb-5">
             <div className="text-muted text-center mt-2 mb-3">
-              <small>Sign in with</small>
+              <small>Đăng nhập bằng</small>
             </div>
             <div className="btn-wrapper text-center">
               <Button
@@ -99,7 +99,7 @@ const Login = () => {
           </CardHeader>
           <CardBody className="px-lg-5 py-lg-5">
             <div className="text-center text-muted mb-4">
-              <small>Or sign in with credentials</small>
+              <small>Hoặc đăng nhập bằng thông tin đăng nhập</small>
               {errorMessage && <p className="alert alert-danger">{errorMessage}</p>}
             </div>
             <Form role="form" onSubmit={handleSubmit}>
@@ -129,7 +129,7 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    placeholder="Password"
+                    placeholder="Mật khẩu"
                     id="password"
                     name="password"
                     type="password"
@@ -154,7 +154,7 @@ const Login = () => {
               </div>
               <div className="text-center">
                 <Button className="my-4" color="primary" type="submit">
-                  Sign in
+                  Đăng nhập
                 </Button>
               </div>
             </Form>
@@ -167,15 +167,15 @@ const Login = () => {
               href="#pablo"
               onClick={(e) => e.preventDefault()}
             >
-              <small>Forgot password?</small>
+              <small>Quên mật khẩu?</small>
             </a>
           </Col>
           <Col className="text-right" xs="6">
             <a
               className="text-light"
-              href="/auth/register"
+              href="/auth/dang-ky"
             >
-              <small>Create new account</small>
+              <small>Tạo mới tài khoản</small>
             </a>
           </Col>
         </Row>

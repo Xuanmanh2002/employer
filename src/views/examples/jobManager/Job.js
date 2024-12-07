@@ -3,10 +3,6 @@ import {
   Card,
   CardHeader,
   CardFooter,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
   Pagination,
   PaginationItem,
   PaginationLink,
@@ -75,10 +71,10 @@ const Job = () => {
 
     const filtered = searchTerm
       ? jobs.filter(
-          (job) =>
-            job.jobName?.toLowerCase().includes(searchTerm) ||
-            job.recruitmentDetails?.toLowerCase().includes(searchTerm)
-        )
+        (job) =>
+          job.jobName?.toLowerCase().includes(searchTerm) ||
+          job.recruitmentDetails?.toLowerCase().includes(searchTerm)
+      )
       : jobs;
 
     setFilteredJobs(filtered);
@@ -119,21 +115,21 @@ const Job = () => {
           <div className="col">
             <Card className="shadow">
               <CardHeader className="border-0 d-flex justify-content-between align-items-center">
-                <h3 className="mb-0">Jobs Table</h3>
+                <h3 className="mb-0">Bảng công việc tuyển dụng</h3>
                 <div className="d-flex align-items-center">
                   <Input
                     type="text"
-                    placeholder="Filter Jobs by name or details"
+                    placeholder="Lọc công việc theo tên hoặc chi tiết"
                     value={filter}
                     onChange={handleFilterChange}
-                    className="me-2"
+                    style={{ marginRight: "40px" }}
                   />
                   <button
                     className="btn btn-primary"
-                    onClick={() => navigate('/employer/create-job')}
-                    style={{ height: "40px" }}
+                    onClick={() => navigate('/employer/tao-moi-cong-viec')}
+                    style={{ height: "40px", width: "150px" }}
                   >
-                    Create
+                    Tạo mới
                   </button>
                 </div>
               </CardHeader>
@@ -154,7 +150,11 @@ const Job = () => {
                     <th scope="col">Active</th>
                     <th scope="col">Thời hạn dịch vụ</th>
                     <th scope="col">Chi tiết công việc</th>
-                    <th scope="col">Dannh mục công việc</th>
+                    <th scope="col">Chức vụ</th>
+                    <th scope="col">Số lượng nhân viên</th>
+                    <th scope="col">Hình thức làm việc</th>
+                    <th scope="col">Giới tính nhân viên</th>
+                    <th scope="col">Danh mục công việc</th>
                     <th scope="col">Ngày khởi tạo</th>
                     <th scope="col">Chức năng</th>
                   </tr>
@@ -170,7 +170,7 @@ const Job = () => {
                     </tr>
                   ) : currentJobs.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="text-center">No jobs found.</td>
+                      <td colSpan="10" className="text-center">No jobs found.</td>
                     </tr>
                   ) : (
                     currentJobs.map((job, index) => (
@@ -195,20 +195,29 @@ const Job = () => {
                             : "N/A"}
                         </td>
                         <td>{job.recruitmentDetails}</td>
+                        <td>{job.ranker}</td>
+                        <td>{job.quantity}</td>
+                        <td>{job.workingForm}</td>
+                        <td>{job.gender}</td>
                         <td>{job.categoryName || "N/A"}</td>
                         <td>{job.createAt ? format(new Date(job.createAt), "dd/MM/yyyy") : "N/A"}</td>
                         <td>
-                          <UncontrolledDropdown>
-                            <DropdownToggle className="btn-icon-only text-light" size="sm">
-                              <i className="fas fa-ellipsis-v" />
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem onClick={() => openModal(job.id)}>Delete</DropdownItem>
-                              <DropdownItem onClick={() => navigate(`/employer/update-job/${job.id}`, { state: job })}>
-                                Edit
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
+                          <div className="d-flex">
+                            <button
+                              className="btn btn-link text-primary p-0 me-3"
+                              onClick={() => navigate(`/employer/cap-nhat-cong-viec/${job.id}`, { state: job })}
+                              title="Edit"
+                            >
+                              <i className="fas fa-edit" />
+                            </button>
+                            <button
+                              className="btn btn-link text-danger p-0"
+                              onClick={() => openModal(job.id)}
+                              title="Delete"
+                            >
+                              <i className="fas fa-trash-alt" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -238,13 +247,13 @@ const Job = () => {
           </div>
         </Row>
         <Modal isOpen={modal} toggle={() => setModal(!modal)}>
-          <ModalHeader toggle={() => setModal(!modal)}>Confirm Delete</ModalHeader>
+          <ModalHeader toggle={() => setModal(!modal)}>Xác nhận xóa</ModalHeader>
           <ModalBody>
-            Are you sure you want to delete this job?
+            Bạn có chắc chắn muốn xóa công việc này không?
           </ModalBody>
           <ModalFooter>
-            <button className="btn btn-secondary" onClick={() => setModal(false)}>Cancel</button>
-            <button className="btn btn-danger" onClick={handleConfirmDelete}>Delete</button>
+            <button className="btn btn-secondary" onClick={() => setModal(false)}>Hủy bỏ</button>
+            <button className="btn btn-danger" onClick={handleConfirmDelete}>Xóa</button>
           </ModalFooter>
         </Modal>
       </Container>
