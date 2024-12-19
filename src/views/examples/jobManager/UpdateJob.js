@@ -200,7 +200,7 @@ const UpdateJob = () => {
                                                 <option value="">Chọn giới tính</option>
                                                 <option value="Nam">Nam</option>
                                                 <option value="Nữ">Nữ</option>
-                                                <option value="Khác">Khác</option>
+                                                <option value="Không yêu cầu">Không yêu cầu</option>
                                             </Input>
                                         </FormGroup>
 

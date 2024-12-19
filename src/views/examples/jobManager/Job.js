@@ -170,7 +170,7 @@ const Job = () => {
                     </tr>
                   ) : currentJobs.length === 0 ? (
                     <tr>
-                      <td colSpan="10" className="text-center">No jobs found.</td>
+                      <td colSpan="12" className="text-center">Không có bài tuyển dụng nào</td>
                     </tr>
                   ) : (
                     currentJobs.map((job, index) => (

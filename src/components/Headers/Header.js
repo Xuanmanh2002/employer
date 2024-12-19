@@ -16,7 +16,7 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Traffic
+                          CV tiếp nhận
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
                           350,897
@@ -46,7 +46,7 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          New users
+                          Cv ứng tuyển mới
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">2,356</span>
                       </div>
@@ -74,7 +74,7 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Sales
+                          Tin tuyển dụng hiển thị
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">924</span>
                       </div>

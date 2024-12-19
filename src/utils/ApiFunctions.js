@@ -102,14 +102,16 @@ export async function registerEmployer(registration) {
 	}
 }
 
-export async function updateEmployer(email, firstName, lastName, gender, avatarFile, addressId, telephone, birthDate, companyName) {
+export async function updateEmployer(email, firstName, lastName, gender, avatarFile, telephone, birthDate, companyName,  scale, fieldActivity, addressId) {
 	const formData = new FormData();
 	formData.append("firstName", firstName);
 	formData.append("lastName", lastName);
 	formData.append("gender", gender);
 	formData.append("telephone", telephone);
+	formData.append("companyName", companyName);
+	formData.append("scale", scale);
+	formData.append("fieldActivity", fieldActivity);
 	formData.append("addressId", addressId);
-	formData.append("companyName", companyName)
 
 	if (birthDate) {
 		formData.append("birthDate", birthDate);
@@ -187,53 +189,53 @@ export async function getAllJob() {
 }
 
 export async function createJob(
-    jobName,
-    experience,
-    price,
-    applicationDeadline,
-    recruitmentDetails,
-    categoryId,
-    ranker,
-    quantity,
-    workingForm,
-    gender
+	jobName,
+	experience,
+	price,
+	applicationDeadline,
+	recruitmentDetails,
+	categoryId,
+	ranker,
+	quantity,
+	workingForm,
+	gender
 ) {
-    const data = {
-        jobName,
-        experience,
-        price,
-        applicationDeadline,
-        recruitmentDetails,
-        categoryId,
-        ranker,
-        quantity,
-        workingForm,
-        gender,
-    };
+	const data = {
+		jobName,
+		experience,
+		price,
+		applicationDeadline,
+		recruitmentDetails,
+		categoryId,
+		ranker,
+		quantity,
+		workingForm,
+		gender,
+	};
 
-    try {
-        const response = await api.post("/employer/job/create", data, {
-            headers: getHeader(),
-        });
+	try {
+		const response = await api.post("/employer/job/create", data, {
+			headers: getHeader(),
+		});
 
-        if (response.status === 200 && response.data.status === "success") {
-            return {
-                success: true,
-                message: response.data.message || "Job created successfully",
-                job: response.data.job,
-            };
-        } else {
-            return {
-                success: false,
-                message: response.data.message || "Failed to create job",
-            };
-        }
-    } catch (error) {
-        return {
-            success: false,
-            message: error.response?.data?.message || error.message || "Internal server error",
-        };
-    }
+		if (response.status === 200 && response.data.status === "success") {
+			return {
+				success: true,
+				message: response.data.message || "Job created successfully",
+				job: response.data.job,
+			};
+		} else {
+			return {
+				success: false,
+				message: response.data.message || "Failed to create job",
+			};
+		}
+	} catch (error) {
+		return {
+			success: false,
+			message: error.response?.data?.message || error.message || "Internal server error",
+		};
+	}
 }
 export async function deleteJob(jobId) {
 	try {
@@ -523,5 +525,45 @@ export async function getServicePackById(serviceId) {
 	} catch (error) {
 		console.error("Error fetching ServicePack:", error);
 		throw new Error(error.response?.data?.message || error.message);
+	}
+}
+
+export async function updateApplicationStatus(id, status) {
+    try {
+        const response = await api.put(`/api/application-documents/update-status/${id}`, null, {
+            headers: getHeader(),
+            params: { status },
+        });
+
+        if (response.status >= 200 && response.status < 300) {
+            return response.data;
+        } else {
+            throw new Error(`Failed to update status with status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Error updating application status:", error);
+        throw new Error(error.response?.data?.message || error.message || "Error updating application status.");
+    }
+}
+
+export async function getApplicationDocumentsByStatus(status, adminId) {
+	try {
+		const response = await api.get("/api/application-documents/status", {
+			headers: getHeader(),
+			params: { 
+				status,
+				adminId 
+			},
+		});
+
+		if (response.status === 204 || !response.data || response.data.length === 0) {
+			return []; 
+		}
+		return response.data; 
+	} catch (error) {
+		console.error("Error fetching application documents by status:", error);
+		throw new Error(
+			error.response?.data?.message || "Error fetching application documents"
+		);
 	}
 }

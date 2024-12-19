@@ -174,9 +174,12 @@ const CreateJob = () => {
                                         >
                                             <option value="">Chọn chức vụ</option>
                                             <option value="Thực tập sinh">Thực tập sinh</option>
+                                            <option value="Trưởng nhóm">Trưởng nhóm</option>
                                             <option value="Nhân viên">Nhân viên</option>
                                             <option value="Quản lý">Quản lý</option>
                                             <option value="Giám đốc">Giám đốc</option>
+                                            <option value="Phó giám đốc">Phó giám đốc</option>
+                                            <option value="Trưởng/Phó phòng">Trưởng/Phó phòng</option>
                                         </Input>
                                     </FormGroup>
 
@@ -193,7 +196,7 @@ const CreateJob = () => {
                                             <option value="">Chọn giới tính</option>
                                             <option value="Nam">Nam</option>
                                             <option value="Nữ">Nữ</option>
-                                            <option value="Khác">Không yêu cầu</option>
+                                            <option value="Không yêu cầu">Không yêu cầu</option>
                                         </Input>
                                     </FormGroup>
 
@@ -225,6 +228,7 @@ const CreateJob = () => {
                                             <option value="Toàn thời gian">Toàn thời gian</option>
                                             <option value="Bán thời gian">Bán thời gian</option>
                                             <option value="Tự do">Tự do</option>
+                                            <option value="Thực tập">Thực tập</option>
                                         </Input>
                                     </FormGroup>
 
@@ -237,6 +241,7 @@ const CreateJob = () => {
                                             placeholder="Nhập thông tin tuyển dụng"
                                             value={jobDetails.recruitmentDetails}
                                             onChange={handleInputChange}
+                                            rows="5"
                                             required
                                         />
                                     </FormGroup>

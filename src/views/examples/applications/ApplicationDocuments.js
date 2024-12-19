@@ -17,12 +17,13 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  ModalFooter
+  ModalFooter,
+  Button
 } from "reactstrap";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import Header from "components/Headers/Header.js";
-import { getApplicationsByEmployer, getAllJob, deleteApplicationDocuments } from "utils/ApiFunctions";
+import { getApplicationsByEmployer, getAllJob, deleteApplicationDocuments, updateApplicationStatus, getApplicationDocumentsByStatus } from "utils/ApiFunctions";
 import { notification } from "antd";
 
 const ApplicationDocuments = () => {
@@ -34,10 +35,31 @@ const ApplicationDocuments = () => {
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [modal, setModal] = useState(false);
-  const [cvModal, setCvModal] = useState(false); 
+  const [cvModal, setCvModal] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState(null);
-  const [cvData, setCvData] = useState(""); 
+  const [cvData, setCvData] = useState("");
   const applicationsPerPage = 5;
+  const [selectedStatus, setSelectedStatus] = useState("");
+
+
+  const handleFilterByStatus = async (status) => {
+    setLoading(true);
+    setError("");
+    setSelectedStatus(status);
+  
+    const adminId = localStorage.getItem("adminId"); 
+  
+    try {
+      const filteredData = await getApplicationDocumentsByStatus(status, adminId);
+      setFilteredApplications(filteredData);
+    } catch (err) {
+      setError("Không thể lọc dữ liệu theo trạng thái.");
+      setFilteredApplications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,14 +103,9 @@ const ApplicationDocuments = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const openModal = (applicationId) => {
-    setApplicationToDelete(applicationId);
-    setModal(true);
-  };
-
-  const openCvModal = (cvBase64) => {
+    const openCvModal = (cvBase64) => {
     setCvData(cvBase64);
-    setCvModal(true); 
+    setCvModal(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -114,6 +131,31 @@ const ApplicationDocuments = () => {
     }
   };
 
+  const handleUpdateStatus = async (applicationId, status) => {
+    try {
+      setLoading(true);
+      await updateApplicationStatus(applicationId, status);
+      const updatedApplications = applications.map((application) =>
+        application.id === applicationId ? { ...application, status } : application
+      );
+      setApplications(updatedApplications);
+      setFilteredApplications(updatedApplications);
+      notification.success({
+        message: 'Thành công',
+        description: `Mail đã được gửi cho bên ứng viên.`,
+      });
+    } catch (error) {
+      setError("Không thể cập nhật trạng thái.");
+      notification.error({
+        message: 'Lỗi',
+        description: error.message || 'Không thể cập nhật trạng thái.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const getJobNameById = (jobId) => {
     const job = jobs.find(job => job.id === jobId);
     return job ? job.jobName : "Unknown";
@@ -130,11 +172,22 @@ const ApplicationDocuments = () => {
                 <h3 className="mb-0">Bảng hồ sơ tuyển dụng</h3>
                 <div className="d-flex align-items-center">
                   <Input
+                    type="select"
+                    value={selectedStatus}
+                    onChange={(e) => handleFilterByStatus(e.target.value)}
+                    style={{ marginRight: "10px", width: "160px" }}
+                  >
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Accept">Trạng thái chấp nhận</option>
+                    <option value="Reject">Trạng thái từ chối</option>
+                    <option value="Received">Trạng thái tiếp nhận</option>
+                  </Input>
+                  <Input
                     type="text"
-                    placeholder="Filter Applications by job name or details"
+                    placeholder="Lọc ứng dụng theo tên công việc hoặc chi tiết"
                     value={filter}
                     onChange={handleFilterChange}
-                    className="me-2"
+                    style={{ width: "280px" }}
                   />
                 </div>
               </CardHeader>
@@ -164,7 +217,7 @@ const ApplicationDocuments = () => {
                     </tr>
                   ) : currentApplications.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="text-center">No applications found.</td>
+                      <td colSpan="10" className="text-center">Không có bài tuyển dụng nào</td>
                     </tr>
                   ) : (
                     currentApplications.map((application, index) => (
@@ -174,7 +227,14 @@ const ApplicationDocuments = () => {
                         <td>{application.email}</td>
                         <td>{application.telephone}</td>
                         <td>{application.letter}</td>
-                        <td>{application.status}</td>
+                        <td>
+                          <span className={`status-badge ${application.status === 'Accept' ? 'status-accepted' :
+                            application.status === 'Reject' ? 'status-rejected' : 'status-pending'
+                            }`}>
+                            {application.status === 'Accept' ? 'Chấp nhận' :
+                              application.status === 'Reject' ? 'Từ chối' : 'Tiếp nhận'}
+                          </span>
+                        </td>
                         <td>{getJobNameById(application.jobId)}</td>
                         <td>{format(new Date(application.createAt), 'dd/MM/yyyy')}</td>
                         <td>
@@ -182,12 +242,19 @@ const ApplicationDocuments = () => {
                             <DropdownToggle className="btn-icon-only text-light" size="sm">
                               <i className="fas fa-ellipsis-v" />
                             </DropdownToggle>
+                            <Button
+                              onClick={() => openCvModal(`data:application/pdf;base64,${application.cv}`)}
+                            >
+                              Xem CV
+                            </Button>
+                            <DropdownMenu className="dropdown-menu-arrow" left>
+                            </DropdownMenu>
                             <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem onClick={() => openModal(application.id)}>Xóa</DropdownItem>
-                              <DropdownItem
-                                onClick={() => openCvModal(`data:application/pdf;base64,${application.cv}`)}
-                              >
-                                Xem CV
+                              <DropdownItem onClick={() => handleUpdateStatus(application.id, 'Accept')}>
+                                Chấp nhận
+                              </DropdownItem>
+                              <DropdownItem onClick={() => handleUpdateStatus(application.id, 'Reject')}>
+                                Từ chối
                               </DropdownItem>
                             </DropdownMenu>
                           </UncontrolledDropdown>
@@ -219,7 +286,6 @@ const ApplicationDocuments = () => {
         </Row>
       </Container>
 
-      {/* Confirmation Modal */}
       <Modal isOpen={modal} toggle={() => setModal(false)}>
         <ModalHeader toggle={() => setModal(false)}>Xác nhận xóa</ModalHeader>
         <ModalBody>Bạn có chắc chắn muốn xóa ứng viên này không?</ModalBody>
@@ -233,7 +299,6 @@ const ApplicationDocuments = () => {
         </ModalFooter>
       </Modal>
 
-      {/* CV Modal */}
       <Modal isOpen={cvModal} toggle={() => setCvModal(false)} size="lg">
         <ModalHeader toggle={() => setCvModal(false)}>Xem CV</ModalHeader>
         <ModalBody>
@@ -245,6 +310,32 @@ const ApplicationDocuments = () => {
           </button>
         </ModalFooter>
       </Modal>
+
+      <style>
+        {`
+          .status-badge {
+            border-radius: 12px; 
+            padding: 5px 15px;
+            font-weight: bold;
+            text-align: center;
+          }
+
+          .status-accepted {
+            background-color: #28a745;
+            color: white;
+          }
+
+          .status-rejected {
+            background-color: #dc3545;
+            color: white;
+          }
+
+          .status-pending {
+            background-color: #ffc107;
+            color: black;
+          }
+        `}
+      </style>
     </>
   );
 };

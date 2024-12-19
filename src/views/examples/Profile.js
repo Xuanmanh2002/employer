@@ -15,6 +15,7 @@ import UserHeader from "components/Headers/UserHeader.js";
 import { getEmployer, updateEmployer, getAllAddress } from "utils/ApiFunctions";
 import { format } from "date-fns";
 import { FaEdit } from "react-icons/fa";
+import { notification } from "antd";
 
 const Profile = () => {
   const [employer, setEmployer] = useState({
@@ -25,8 +26,10 @@ const Profile = () => {
     avatar: "",
     gender: "",
     telephone: "",
+    companyName: "",
+    scale: "",
+    fieldActivity: "",
     addressId: "",
-    companyName: ""
   });
   const [addressName, setAddressName] = useState("");
   const [addresses, setAddresses] = useState([]);
@@ -58,6 +61,14 @@ const Profile = () => {
       setErrorMessage("User not logged in");
     }
   }, [email, token]);
+
+  const openNotification = (type, message, description) => {
+    notification[type]({
+      message: message,
+      description: description,
+      placement: "topRight",
+    });
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -115,18 +126,19 @@ const Profile = () => {
         employer.lastName,
         employer.gender,
         employer.avatar,
-        employer.addressId,
         employer.telephone,
         employer.birthDate,
-        employer.companyName
+        employer.companyName,
+        employer.scale,
+        employer.fieldActivity,
+        employer.addressId,
       );
-      setErrorMessage("");
-      setSuccessMessage("Profile updated successfully!");
+      openNotification("success", "Thành công", "Cập nhật thông tin thành công!");
     } catch (error) {
-      setErrorMessage(error.message);
-      setSuccessMessage("");
+      openNotification("error", "Lỗi", error.message || "Cập nhật thông tin thất bại!");
     }
   };
+
   return (
     <>
       <UserHeader />
@@ -334,7 +346,7 @@ const Profile = () => {
                       Thông tin liên hệ
                     </h6>
                     <Row>
-                      <Col md="12">
+                      <Col lg="6">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -362,9 +374,7 @@ const Profile = () => {
                           </Input>
                         </FormGroup>
                       </Col>
-                    </Row>
-                    <Row>
-                      <Col lg="4">
+                      <Col lg="6">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -376,6 +386,44 @@ const Profile = () => {
                             name="companyName"
                             className="form-control-alternative"
                             defaultValue={employer.companyName}
+                            id="input-city"
+                            type="text"
+                            onChange={handleInputChange}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-city"
+                          >
+                            Quy mô
+                          </label>
+                          <Input
+                            name="scale"
+                            className="form-control-alternative"
+                            value={employer.scale}
+                            id="input-city"
+                            type="text"
+                            onChange={handleInputChange}
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-city"
+                          >
+                            Lĩnh vực
+                          </label>
+                          <Input
+                            name="fieldActivity"
+                            className="form-control-alternative"
+                            defaultValue={employer.fieldActivity}
                             id="input-city"
                             type="text"
                             onChange={handleInputChange}

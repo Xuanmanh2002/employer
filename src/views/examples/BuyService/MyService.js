@@ -22,6 +22,7 @@ import {
 import { notification } from "antd";
 import { FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 const MyService = () => {
     const navigate = useNavigate();
@@ -160,7 +161,7 @@ const MyService = () => {
                                                 <th scope="col">Tên dịch vụ</th>
                                                 <th scope="col">Số lượng</th>
                                                 <th scope="col">Giá</th>
-                                                <th scope="col">Tổng thời hạn hiệu lực</th>
+                                                <th scope="col">Thời hạn hiệu lực</th>
                                                 <th scope="col">Tổng tiền</th>
                                                 <th scope="col">Mô tả</th>
                                                 <th scope="col">Hành động</th>
@@ -177,7 +178,7 @@ const MyService = () => {
                                                             {indexOfFirstJob + index + 1}
                                                         </th>
                                                         <td>{matchingService.serviceName}</td>
-                                                        <td>{matchingService.quantity}</td>
+                                                        <td>{orderDetail.quantity}</td>
                                                         <td>
                                                             {orderDetail.price.toLocaleString(
                                                                 "vi-VN",
@@ -187,7 +188,14 @@ const MyService = () => {
                                                                 }
                                                             )}
                                                         </td>
-                                                        <td>{orderDetail.totalValidityPeriod} ngày</td>
+                                                        <td>{orderDetail.activationDate && orderDetail.totalValidityPeriod
+                                                            ? format(
+                                                                new Date(orderDetail.activationDate).setDate(
+                                                                    new Date(orderDetail.activationDate).getDate() + orderDetail.totalValidityPeriod
+                                                                ),
+                                                                "dd/MM/yyyy"
+                                                            )
+                                                            : "N/A"}</td>
                                                         <td>
                                                             {orderDetail.totalAmounts.toLocaleString(
                                                                 "vi-VN",

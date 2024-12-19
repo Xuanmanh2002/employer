@@ -13,15 +13,14 @@ const ServiceDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const [servicePack, setServicePack] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [addingToCart, setAddingToCart] = useState(false); 
-    const navigate = useNavigate(); 
+    const [addingToCart, setAddingToCart] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchServicePack = async () => {
             try {
                 const data = await getServicePackById(id);
                 setServicePack(data);
-                setQuantity(data.quantity); 
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching service pack:", error);
@@ -40,7 +39,7 @@ const ServiceDetail = () => {
     const handleBuyNow = async () => {
         try {
             setAddingToCart(true);
-            await addItemToCart(servicePack.id, quantity); 
+            await addItemToCart(servicePack.id, quantity);
             setAddingToCart(false);
             notification.success({
                 message: 'Thêm vào giỏ hàng thành công!',
@@ -52,16 +51,17 @@ const ServiceDetail = () => {
             notification.error({
                 message: 'Có lỗi xảy ra',
                 description: error.message,
-                placement: 'topRight', 
+                placement: 'topRight',
             });
         }
     };
 
     const incrementQuantity = () => setQuantity(prev => prev + 1);
+
     const decrementQuantity = () => {
         if (quantity > 1) setQuantity(prev => prev - 1);
     };
-
+    
     const handleQuantityChange = (e) => {
         const value = parseInt(e.target.value, 10);
         if (value >= 1) setQuantity(value); 
@@ -149,7 +149,7 @@ const ServiceDetail = () => {
                                         </Button>
                                         <Input
                                             type="number"
-                                            value={quantity} 
+                                            value={quantity}
                                             onChange={handleQuantityChange}
                                             style={{ width: "100px", textAlign: "center" }}
                                         />
@@ -161,7 +161,7 @@ const ServiceDetail = () => {
                                 <div style={{ display: "flex", paddingTop: "10px", alignItems: "center", gap: "10px", justifyContent: "center" }}>
                                     <Button
                                         color="primary"
-                                        onClick={handleBuyNow} 
+                                        onClick={handleBuyNow}
                                         style={{ width: "150px", height: "40px", fontSize: "13px" }}
                                         disabled={addingToCart}
                                     >
@@ -169,7 +169,7 @@ const ServiceDetail = () => {
                                     </Button>
                                     <Button
                                         color="success"
-                                        onClick={handleBuyNow} 
+                                        onClick={handleBuyNow}
                                         style={{ width: "150px", height: "40px", fontSize: "13px" }}
                                         disabled={addingToCart}
                                     >
