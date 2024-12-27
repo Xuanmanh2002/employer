@@ -21,8 +21,6 @@ var routes = [
   },
   {
     path: "/thong-tin-cua-toi",
-    name: "Thông tin của tôi",
-    icon: "ni ni-single-02 text-yellow",
     component: <Profile />,
     layout: "/employer",
   },

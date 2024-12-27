@@ -13,21 +13,21 @@ import {
 } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "components/Auth/AuthProvider";
-import { checkRoleEmployer, getAllCartItems } from "utils/ApiFunctions";
+import { checkRoleEmployer, getAllCartItems, getNotificationsByRole } from "utils/ApiFunctions";
 
 const EmployerNavbar = (props) => {
   const { handleLogout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
-
+  const [notifications, setNotifications] = useState([]);
   const [employer, setEmployer] = useState({
     firstName: "",
     lastName: "",
     avatar: "",
     roles: [{ id: "", name: "" }],
   });
-
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -37,6 +37,18 @@ const EmployerNavbar = (props) => {
         setCartItemCount(items.length);
       } catch (error) {
         console.error("Error fetching cart items:", error);
+      }
+    };
+
+    const fetchNotifications = async () => {
+      setLoadingNotifications(true);
+      try {
+        const data = await getNotificationsByRole();
+        setNotifications(data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        setLoadingNotifications(false);
       }
     };
 
@@ -61,6 +73,7 @@ const EmployerNavbar = (props) => {
       return;
     }
 
+    fetchNotifications();
     fetchEmployerData();
     fetchCartItems();
 
@@ -123,24 +136,42 @@ const EmployerNavbar = (props) => {
               </Badge>
             </Button>
 
-            <UncontrolledDropdown nav>
+            <UncontrolledDropdown nav className="position-relative">
               <DropdownToggle nav>
                 <i className="ni ni-bell-55 text-white" />
+                <Badge
+                  color="danger"
+                  pill
+                  className="position-absolute"
+                  style={{ top: "-2px", right: "-20px", fontSize: "0.75rem" }}
+                >
+                  {notifications.length}
+                </Badge>
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-arrow" right>
-                <DropdownItem header tag="div">
-                  <h6 className="text-overflow m-0">Notifications</h6>
+                <DropdownItem className="noti-title" header tag="div">
+                  <h6 className="text-overflow m-0">Thông báo</h6>
                 </DropdownItem>
-                <DropdownItem>
-                  <Link to="/notifications">View All Notifications</Link>
-                </DropdownItem>
-                <DropdownItem>
-                  <span>Mark All as Read</span>
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <DropdownItem key={index}>
+                      <i className="ni ni-bell-55" />
+                      <span>{notification.title}</span>
+                    </DropdownItem>
+                  ))
+                ) : (
+                  <DropdownItem className="text-center text-muted">
+                    Không có thông báo
+                  </DropdownItem>
+                )}
+                <DropdownItem divider />
+                <DropdownItem className="text-center text-muted" disabled>
+                  Xem tất cả thông báo
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
 
-            <UncontrolledDropdown nav>
+            <UncontrolledDropdown nav  style={{paddingLeft: "20px"}}>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
                   <span className="avatar avatar-sm rounded-circle">
@@ -160,9 +191,9 @@ const EmployerNavbar = (props) => {
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Chào mừng!</h6>
                 </DropdownItem>
-                <DropdownItem to="/employer/user-profile" tag={Link}>
+                <DropdownItem to="/employer/thong-tin-cua-toi" tag={Link}>
                   <i className="ni ni-single-02" />
-                  <span>Hồ sơ của tôi</span>
+                  <span>Thông tin cá nhân</span>
                 </DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem

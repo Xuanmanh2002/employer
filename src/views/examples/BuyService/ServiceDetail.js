@@ -115,6 +115,14 @@ const ServiceDetail = () => {
                                     <FaCheckCircle style={{ color: "#1abc9c", marginRight: "8px" }} />
                                     Trải nghiệm đăng tin tuyển dụng hiệu quả với vị trí nổi bật trong việc làm tốt nhất kết hợp cùng các dịch vụ cao cấp, giá dùng thử hấp dẫn.
                                 </CardText>
+                                <CardText className="mb-4" style={{ fontSize: "1rem", color: "#6c757d" }}>
+                                    <FaCheckCircle style={{ color: "#1abc9c", marginRight: "8px" }} />
+                                    Đăng tải {servicePack.benefit} bài viết
+                                </CardText>
+                                <CardText className="mb-4" style={{ fontSize: "1rem", color: "#6c757d" }}>
+                                    <FaCheckCircle style={{ color: "#1abc9c", marginRight: "8px" }} />
+                                    Hiển thị trong {servicePack.displayPosition}
+                                </CardText>
                                 <div className="mb-3" style={{ display: "flex", alignItems: "center" }}>
                                     <FaClock style={{ color: "#1abc9c", marginRight: "8px" }} />
                                     <span>Thời gian hiệu lực: <b>{servicePack.validityPeriod} ngày</b></span>

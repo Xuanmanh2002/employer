@@ -417,20 +417,26 @@ export async function getCartByEmployer() {
 		throw new Error(error.response?.data?.message || "Error fetching employer's cart");
 	}
 }
-export async function createOrder(cart) {
-	try {
-		const response = await api.post(`/api/order/create?cart=${cart}`, null, {
-			headers: getHeader(),
-		});
 
-		if (response.status === 200) {
-			console.log("Order created successfully:", response.data);
-		} else {
-			throw new Error("Failed to create order");
-		}
-	} catch (error) {
-		console.error("Error creating order:", error.message);
-	}
+export async function createOrder(cartId) {
+    try {
+        const response = await api.post('/api/order/create', null, {
+            params: { cartId }, 
+            headers: getHeader(),
+        });
+
+        if (response.status === 200) {
+            const { order, paymentUrl } = response.data;
+            console.log("Order created successfully:", order);
+            console.log("Redirecting to Payment URL:", paymentUrl);
+            window.location.href = paymentUrl;
+        } else {
+            console.error("Failed to create order:", response.data);
+        }
+    } catch (error) {
+        console.error("Error creating order:", error.response?.data || error.message);
+        alert("Có lỗi xảy ra khi tạo đơn hàng: " + error.response?.data || error.message);
+    }
 }
 
 export async function getApplicationsByEmployer() {
@@ -567,3 +573,71 @@ export async function getApplicationDocumentsByStatus(status, adminId) {
 		);
 	}
 }
+
+export async function getNotificationsByRole() {
+	try {
+		const response = await api.get("/api/notifications/by-role", {
+			headers: getHeader(),
+		});
+		if (response.status === 200) {
+			return response.data;
+		} else {
+			throw new Error(`Failed to fetch notifications, status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching notifications:", error);
+		throw new Error(error.response?.data?.message || error.message);
+	}
+}
+
+export async function countApplicationDocuments() {
+	try {
+		const response = await api.get("/api/application-documents/count-applications", {
+			headers: getHeader(),
+		});
+
+		if (response.status === 200) {
+			return response.data; 
+		} else {
+			throw new Error(`Failed to fetch application documents count. Status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching application documents count:", error);
+		throw new Error(error.response?.data?.message || "Internal server error");
+	}
+}
+
+export async function countApplicationDocumentsPending() {
+	try {
+		const response = await api.get("/api/application-documents/count-applications-pending", {
+			headers: getHeader(),
+		});
+
+		if (response.status === 200) {
+			return response.data; 
+		} else {
+			throw new Error(`Failed to fetch application documents count. Status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching application documents count:", error);
+		throw new Error(error.response?.data?.message || "Internal server error");
+	}
+}
+
+export async function countJobTrue() {
+	try {
+		const response = await api.get("/employer/job/count-job-true", {
+			headers: getHeader(),
+		});
+
+		if (response.status === 200) {
+			return response.data; 
+		} else {
+			throw new Error(`Failed to fetch job count. Status: ${response.status}`);
+		}
+	} catch (error) {
+		console.error("Error fetching job count:", error);
+		throw new Error(error.response?.data?.message || "Internal server error");
+	}
+}
+

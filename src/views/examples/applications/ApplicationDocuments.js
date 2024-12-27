@@ -228,10 +228,10 @@ const ApplicationDocuments = () => {
                         <td>{application.telephone}</td>
                         <td>{application.letter}</td>
                         <td>
-                          <span className={`status-badge ${application.status === 'Accept' ? 'status-accepted' :
+                          <span className={`status-badge ${application.status === 'Received' ? 'status-accepted' :
                             application.status === 'Reject' ? 'status-rejected' : 'status-pending'
                             }`}>
-                            {application.status === 'Accept' ? 'Chấp nhận' :
+                            {application.status === 'Received' ? 'Chấp nhận' :
                               application.status === 'Reject' ? 'Từ chối' : 'Tiếp nhận'}
                           </span>
                         </td>
@@ -250,7 +250,7 @@ const ApplicationDocuments = () => {
                             <DropdownMenu className="dropdown-menu-arrow" left>
                             </DropdownMenu>
                             <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem onClick={() => handleUpdateStatus(application.id, 'Accept')}>
+                              <DropdownItem onClick={() => handleUpdateStatus(application.id, 'Received')}>
                                 Chấp nhận
                               </DropdownItem>
                               <DropdownItem onClick={() => handleUpdateStatus(application.id, 'Reject')}>
@@ -302,7 +302,7 @@ const ApplicationDocuments = () => {
       <Modal isOpen={cvModal} toggle={() => setCvModal(false)} size="lg">
         <ModalHeader toggle={() => setCvModal(false)}>Xem CV</ModalHeader>
         <ModalBody>
-          <embed src={cvData} width="100%" height="600px" />
+          <embed src={cvData} width="100%" height="700px" />
         </ModalBody>
         <ModalFooter>
           <button className="btn btn-secondary" onClick={() => setCvModal(false)}>

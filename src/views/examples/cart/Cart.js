@@ -38,10 +38,16 @@ const Cart = () => {
                     getAllService(),
                     getCartByEmployer(),
                 ]);
-                setState({ services, cartItems, carts, loading: false, error: "" });
+                const servicesMap = services.reduce((map, service) => {
+                    map[service.id] = service;
+                    return map;
+                }, {});
+    
+                setState({ services, servicesMap, cartItems, carts, loading: false, error: "" });
             } catch (error) {
                 setState({
                     services: [],
+                    servicesMap: {},
                     cartItems: [],
                     carts: {},
                     loading: false,
@@ -49,13 +55,11 @@ const Cart = () => {
                 });
             }
         };
-
+    
         fetchData();
     }, []);
 
-    const getServiceDetails = (serviceId) => {
-        return state.services.find((service) => service.id === serviceId) || {};
-    };
+   
 
     const updateQuantity = async (serviceId, increment) => {
         const item = state.cartItems.find((item) => item.serviceId === serviceId);
@@ -112,27 +116,42 @@ const Cart = () => {
 
     const handleCreateOrder = async () => {
         setState((prev) => ({ ...prev, loading: true }));
-        try {
+        try {   
             const cartId = state.carts?.id;
             if (!cartId) {
                 throw new Error("Cart ID is missing");
             }
-
+    
             await createOrder(cartId);
-
+    
+            const updatedCartItems = await getAllCartItems();
+            const updatedCart = await getCartByEmployer();
+    
+            setState((prev) => ({
+                ...prev,
+                cartItems: updatedCartItems,
+                carts: updatedCart,
+                loading: false,
+            }));
+    
             notification.success({
                 message: "Thành công",
-                description: "Đơn hàng đã được tạo thành công.",
+                description: "Đơn hàng đã được tạo thành công. Chuyển hướng đến trang thanh toán...",
             });
         } catch (error) {
             notification.error({
                 message: "Lỗi",
-                description: error.message || "Không thể tạo đơn hàng.",
+                description: error.response?.data?.message || error.message || "Không thể tạo đơn hàng.",
             });
         } finally {
             setState((prev) => ({ ...prev, loading: false }));
         }
     };
+
+    const getServiceDetails = React.useCallback(
+        (serviceId) => state.servicesMap[serviceId] || {},
+        [state.servicesMap]
+    );
 
     const { cartItems, services, carts, loading, error } = state;
     const totalAmounts = carts?.totalAmounts || 0;

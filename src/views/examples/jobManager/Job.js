@@ -177,7 +177,7 @@ const Job = () => {
                       <tr key={job.id}>
                         <th scope="row">{indexOfFirstJob + index + 1}</th>
                         <td>{job.jobName}</td>
-                        <td>{job.experience}<span> năm</span></td>
+                        <td>{job.experience}</td>
                         <td>{job.applicationDeadline ? format(new Date(job.applicationDeadline), "dd/MM/yyyy") : "N/A"}</td>
                         <td>
                           <span className={job.status ? "text-success" : "text-danger"}>

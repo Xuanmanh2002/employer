@@ -161,6 +161,7 @@ const MyService = () => {
                                                 <th scope="col">Tên dịch vụ</th>
                                                 <th scope="col">Số lượng</th>
                                                 <th scope="col">Giá</th>
+                                                <th scope="col">Số lượng bài viết</th>
                                                 <th scope="col">Thời hạn hiệu lực</th>
                                                 <th scope="col">Tổng tiền</th>
                                                 <th scope="col">Mô tả</th>
@@ -188,6 +189,7 @@ const MyService = () => {
                                                                 }
                                                             )}
                                                         </td>
+                                                        <td>{orderDetail.totalBenefit}</td>
                                                         <td>{orderDetail.activationDate && orderDetail.totalValidityPeriod
                                                             ? format(
                                                                 new Date(orderDetail.activationDate).setDate(
